@@ -466,3 +466,16 @@ bypass governance — it is simply a different access mechanism.
 **Rationale:** The MEC is the constitutional adjudication authority for Continuum. It adjudicates above The Bridge but does not direct it. It requires a named, isolated agent registration. The subagents.allowAgents: [] entry enforces the identity-level constraint that the MEC does not spawn sub-agents — A3 escalates directly to human review. The enabled flag allows safe deactivation without removing the registry entry.
 
 **Authority:** Faheem, 2026-03-16.
+
+---
+
+## ADR-023 — Gauge Registered as Named Agent in openclaw.json
+
+**Date:** 2026-03-16
+**Status:** Closed
+
+**Decision:** Gauge is registered as a named agent entry in ~/.openclaw/openclaw.json under agents.list with agent ID 'gauge', enabled: true, model claude-opus-4-6, isolated workspace at ~/.openclaw/workspace/gauge/, agent directory at ~/.openclaw/agents/gauge/, and subagents.allowAgents: [] enforcing the no-spawning constraint at the OpenClaw level.
+
+**Rationale:** Gauge is the system's measurement and reporting agent. It reads telemetry through the Observability Layer query surface, computes metrics against locked formula definitions, and emits structured output for Bridge-governed delivery. It has measurement authority only. The subagents.allowAgents: [] entry enforces the constraint that Gauge does not spawn sub-agents. The enabled flag allows safe deactivation without removing the registry entry.
+
+**Authority:** Faheem, 2026-03-16.
