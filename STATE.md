@@ -17,7 +17,7 @@ locked in the Obsidian vault at Projects/Faheem's PAC System/.
 
 last_action: RAG-Workflow.md written and locked — PACS-DATA-RWF-001 v1.0.0. Stage 1 Task 2 complete — all four Data Layer documents locked.
 next_action: Stage 1 Task 3 — OpenClaw installation and Gateway configuration
-last_updated: 2026-03-16
+last_updated: 2026-03-16 12:35:49
 
 ---
 
@@ -25,11 +25,15 @@ last_updated: 2026-03-16
 
 Stage 1 — Infrastructure Foundation:
 
+- [x] Graph-Schema.md — COMPLETE, LOCKED (PACS-ARCH-GRAPH-001 v1.0.0)
+- [x] Knowledge-Base-Design.md — COMPLETE, LOCKED (PACS-DATA-KBD-001 v1.0.0)
+- [x] Vector-Store-Selection.md — COMPLETE, LOCKED (PACS-DATA-VSS-001 v1.0.0)
+- [x] Chunking-Strategy.md — COMPLETE, LOCKED (PACS-DATA-CST-001 v1.0.0)
+- [x] RAG-Workflow.md — COMPLETE, LOCKED (PACS-DATA-RWF-001 v1.0.0)
 - [ ] OpenClaw installation on Mac Studio M3 Ultra
 - [ ] Gateway configuration (The Bridge's home in OpenClaw)
 - [ ] Telemetry pipeline setup
 - [ ] Tamper-Evident Audit Log implementation
-- [ ] Graph-Schema.md — write this FIRST (Locus prerequisite)
 - [ ] Resolve GAP-001: CONTRADICTION_DETECTED event (Locus Event Model)
 - [ ] Resolve GAP-002: CONFLICT_DETECTED event (Foundry Event Model)
 - [ ] Resolve GAP-003: ITEM_FILTERED event (Signal Event Model)
@@ -97,6 +101,9 @@ Authorization condition: 4 clean paper portfolio cycles + Faheem explicit re-aut
 ---
 
 ## Recent Activity
+- 2026-03-16 12:35:49 | Edit | /Users/faheem/Library/Mobile Documents/iCloud~md~obsidian/Documents/MyBrain/Projects/Faheem's PACS/10-Claude-Code-Implementation/Claude-Code-Opening-Prompt.md
+- 2026-03-16 12:35:42 | Edit | /Users/faheem/Library/Mobile Documents/iCloud~md~obsidian/Documents/MyBrain/Projects/Faheem's PACS/10-Claude-Code-Implementation/Claude-Code-Opening-Prompt.md
+- 2026-03-16 12:35:31 | Edit | /Users/faheem/Library/Mobile Documents/iCloud~md~obsidian/Documents/MyBrain/Projects/Faheem's PACS/10-Claude-Code-Implementation/Claude-Code-Opening-Prompt.md
 - 2026-03-16 12:25:14 | Edit | TASKS.md
 - 2026-03-16 12:25:07 | Edit | DECISIONS.md
 - 2026-03-16 12:24:40 | Edit | /Users/faheem/Library/Mobile Documents/iCloud~md~obsidian/Documents/MyBrain/Projects/Faheem's PACS/03-Data-Layer/RAG-Workflow.md
