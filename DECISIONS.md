@@ -453,3 +453,16 @@ bypass governance — it is simply a different access mechanism.
 **Rationale:** The Bridge is the control-plane authority for Continuum. It requires a named, isolated agent registration separate from the default main agent. The subagents.allowAgents: [] entry enforces the identity-level constraint that The Bridge does not spawn sub-agents — routing to domain agents goes via A1 route_task, not via spawning. The enabled flag allows safe activation and deactivation without removing the registry entry.
 
 **Authority:** Faheem, 2026-03-16.
+
+---
+
+## ADR-022 — Meta-Evaluation Checkpoint Registered as Named Agent in openclaw.json
+
+**Date:** 2026-03-16
+**Status:** Closed
+
+**Decision:** The Meta-Evaluation Checkpoint (MEC) is registered as a named agent entry in ~/.openclaw/openclaw.json under agents.list with agent ID 'mec', enabled: true, model claude-opus-4-6, isolated workspace at ~/.openclaw/workspace/mec/, agent directory at ~/.openclaw/agents/mec/, and subagents.allowAgents: [] enforcing the no-spawning constraint at the OpenClaw level.
+
+**Rationale:** The MEC is the constitutional adjudication authority for Continuum. It adjudicates above The Bridge but does not direct it. It requires a named, isolated agent registration. The subagents.allowAgents: [] entry enforces the identity-level constraint that the MEC does not spawn sub-agents — A3 escalates directly to human review. The enabled flag allows safe deactivation without removing the registry entry.
+
+**Authority:** Faheem, 2026-03-16.
