@@ -6,6 +6,7 @@ import { shouldLogVerbose } from "../globals.js";
 import { createInternalHookEvent, triggerInternalHook } from "../hooks/internal-hooks.js";
 import { logDebug } from "../logger.js";
 import { listBindings } from "./bindings.js";
+import { isGovernedAgentId } from "./governed-registry.js";
 import {
   buildAgentMainSessionKey,
   buildAgentPeerSessionKey,
@@ -670,6 +671,38 @@ export function resolveAgentRoute(input: ResolveAgentRouteInput): ResolvedAgentR
 
   const choose = (agentId: string, matchedBy: ResolvedAgentRoute["matchedBy"]) => {
     const resolvedAgentId = pickFirstExistingAgentId(input.cfg, agentId);
+
+    if (!isGovernedAgentId(resolvedAgentId)) {
+      logDebug(
+        `[governance] REGISTRY_CHECK_FAILED: candidate='${agentId}' ` +
+          `resolved='${resolvedAgentId}' not in Continuum Governed Registry. ` +
+          `Remapping to the-bridge.`,
+      );
+      // Remap — do not recurse. Build the Bridge route directly.
+      const bridgeId = "the-bridge";
+      const sessionKey = buildAgentSessionKey({
+        agentId: bridgeId,
+        channel,
+        accountId,
+        peer,
+        dmScope,
+        identityLinks,
+      }).toLowerCase();
+      const mainSessionKey = buildAgentMainSessionKey({
+        agentId: bridgeId,
+        mainKey: DEFAULT_MAIN_KEY,
+      }).toLowerCase();
+      return {
+        agentId: bridgeId,
+        channel,
+        accountId,
+        sessionKey,
+        mainSessionKey,
+        lastRoutePolicy: deriveLastRoutePolicy({ sessionKey, mainSessionKey }),
+        matchedBy,
+      };
+    }
+
     const sessionKey = buildAgentSessionKey({
       agentId: resolvedAgentId,
       channel,

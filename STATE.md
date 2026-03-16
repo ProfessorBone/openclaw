@@ -22,7 +22,7 @@ locked in the Obsidian vault at Projects/Faheem's PAC System/.
 
 last_action: Foundry Pre-condition A complete: pre-route hook added to internal-hooks.ts and resolve-route.ts.
 next_action: Foundry Pre-condition B: governed agent registry enforced at runtime.
-last_updated: 2026-03-16 17:45:23
+last_updated: 2026-03-16 18:01:20
 
 ---
 
@@ -106,6 +106,10 @@ Authorization condition: 4 clean paper portfolio cycles + Faheem explicit re-aut
 ---
 
 ## Recent Activity
+
+- 2026-03-16 18:01:20 | Edit | src/routing/resolve-route.ts
+- 2026-03-16 18:01:10 | Edit | src/routing/resolve-route.ts
+- 2026-03-16 18:01:06 | Write | src/routing/governed-registry.ts
 
 - 2026-03-16 17:45:23 | Edit | src/routing/resolve-route.ts
 - 2026-03-16 17:45:18 | Edit | src/routing/resolve-route.ts
