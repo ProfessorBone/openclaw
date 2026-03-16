@@ -56,11 +56,16 @@ Stage 1 — Infrastructure Foundation
 ### Telemetry Pipeline
 
 - [ ] Design telemetry event collection architecture
-- [ ] Add CONTRADICTION_DETECTED event to Locus-Event-Model.md (GAP-001)
-- [ ] Add CONFLICT_DETECTED event to Foundry-Event-Model.md (GAP-002)
-- [ ] Add ITEM_FILTERED event to Signal-Event-Model.md (GAP-003)
-- [ ] Confirm cross-agent stream access architecture (GAP-004/005)
-- [ ] Write Telemetry.md infrastructure spec (PACS-OBS-005 — currently PENDING)
+- [x] GAP-001 RESOLVED — Locus-Event-Model.md already contains G-003 CONTRADICTION_FLAGGED
+      (fully specified). TASKS.md label was stale. No edit to the locked document needed.
+- [x] GAP-002 RESOLVED — Foundry-Event-Model.md already contains G-001 SOURCE_CONFLICT_REPORTED
+      and I-002 SILENT_ABSORPTION_DETECTED (fully specified). TASKS.md label was stale.
+- [x] GAP-003 RESOLVED — Signal-Event-Model.md already contains E-003 FILTERED_MATERIAL_LOGGED
+      (fully specified). TASKS.md label was stale. No edit to the locked document needed.
+- [x] GAP-004/005 RESOLVED — Cross-agent stream access mediated by Observability Layer. Five stream
+      visibility classes defined. No direct agent-to-agent stream reads. Resolved in Telemetry.md Section 4.
+- [x] Write Telemetry.md infrastructure spec — COMPLETE. PACS-OBS-005 v1.0.0 LOCKED.
+      15 taxonomy corrections (C-01 through C-15), GAP-003 resolved, all five GAPs resolved.
 
 ### Tamper-Evident Audit Log
 

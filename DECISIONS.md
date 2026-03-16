@@ -331,6 +331,7 @@ DECISIONS.md entry and architectural justification.
 ---
 
 ## ADR-014 — enableAllProjectMcpServers Enabled in settings.local.json
+
 **Date:** 2026-03-15
 **Status:** Closed
 
@@ -349,6 +350,7 @@ correctly in VS Code agent sessions.
 ---
 
 ## ADR-016 — Filesystem MCP Server Added to Claude Desktop Config
+
 **Date:** 2026-03-15
 **Status:** Closed
 
@@ -367,6 +369,7 @@ a full round trip from every file review workflow.
 ---
 
 ## ADR-017 — Filesystem Server Added to .mcp.json for Claude Code Vault Access
+
 **Date:** 2026-03-15
 **Status:** Closed
 
@@ -385,6 +388,7 @@ depending on ~/.claude.json.
 ---
 
 ## ADR-019 — MCP-First File Access Rule Added to CLAUDE.md
+
 **Date:** 2026-03-15
 **Status:** Closed
 
@@ -412,6 +416,7 @@ bypass governance — it is simply a different access mechanism.
 ---
 
 ## ADR-018 — RAG Workflow Consistency Model: Conditional Qdrant Ingestion
+
 **Date:** 2026-03-16
 **Status:** Closed
 
@@ -420,5 +425,18 @@ bypass governance — it is simply a different access mechanism.
 **Source:** Resolves the open design question explicitly deferred from Vector-Store-Selection.md Section 5 (PACS-DATA-VSS-001 v1.0.0).
 
 **Rationale:** Retrieval sequence integrity (Phase 1 must be able to identify the artifact before Phase 2 retrieves from it), governed ingestion principle (unverified content must not enter the active retrieval corpus), and Context Package coherence (cross-layer linkage requires matching source_artifact_id in both graph and vector stores).
+
+**Authority:** Faheem, 2026-03-16.
+
+---
+
+## ADR-020 — KNOWLEDGE_GRAPH_UPDATE_EMITTED Taxonomy Supersession
+
+**Date:** 2026-03-16
+**Status:** Closed
+
+**Decision:** The taxonomy pre-registration KNOWLEDGE_GRAPH_UPDATE_EMITTED (PACS-OBS-001) is retired. The Locus event model (PACS-OBS-AEM-006) supersedes it with four distinct emission events: EXTRACTION_CANDIDATE_FORMED (A1), LINK_CANDIDATE_FORMED (A2), QUERY_RESULT_EMITTED (A3), and DECISION_LOG_ENTRY_EMITTED (A4). These four events collectively cover the observable emission surface that the single placeholder represented. The supersession is recorded in Telemetry.md Section 3 correction C-08.
+
+**Rationale:** A single placeholder event cannot carry the semantic precision required for audit, calibration, and governance surfaces across four distinct actuators with different downstream consumers and routing behaviors. The Locus model's four-event registry is the correct implementation-grade specification.
 
 **Authority:** Faheem, 2026-03-16.
