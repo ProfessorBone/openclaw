@@ -142,7 +142,8 @@ the registry must be denied or remapped. Without this check, the registry is
 documentation but not governance.
 Source: 02-Architecture/Governed-Agent-Registry.md.
 
-**Pre-condition C — Governed spawning pathway documented:**
+**Pre-condition C — Governed spawning pathway documented:** [x] COMPLETE
+Governed-Spawning-Pathway.md — PACS-ARCH-SPAWN-001 v1.0.0 LOCKED at 02-Architecture/Governed-Spawning-Pathway.md
 A named process must exist for adding new agent types. Required steps: Foundry
 designs the new agent, The Bridge authorizes the registry addition, Faheem approves
 a DECISIONS.md entry, agent is added to openclaw.json. Only then can the new agent
