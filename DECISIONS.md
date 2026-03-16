@@ -492,3 +492,16 @@ bypass governance — it is simply a different access mechanism.
 **Rationale:** Locus is the shared knowledge infrastructure for Continuum. It ingests designated artifacts, extracts entities and relationships under Tier-2 SLM constraint, maintains the persistent cross-domain knowledge graph, and surfaces connections on request. All graph writes route through Bridge MEMORY_COMMIT_AUTH and MEC adjudication. Contradiction surfacing routes through a separate contradiction review pathway. Graph-Schema.md prerequisite (PACS-ARCH-GRAPH-001 v1.0.0) is satisfied.
 
 **Authority:** Faheem, 2026-03-16.
+
+---
+
+## ADR-025 — Crucible Registered as Named Agent in openclaw.json
+
+**Date:** 2026-03-16
+**Status:** Closed
+
+**Decision:** Crucible is registered as a named agent entry in ~/.openclaw/openclaw.json under agents.list with agent ID 'crucible', enabled: true, model claude-opus-4-6, isolated workspace at ~/.openclaw/workspace/crucible/, agent directory at ~/.openclaw/agents/crucible/, and subagents.allowAgents: [] enforcing the no-spawning constraint at the OpenClaw level.
+
+**Rationale:** Crucible is Continuum's persistent mastery engine for the science and engineering of agentic systems. It delivers scientifically grounded instruction and evaluates tutoring effectiveness through a governed Reflexion loop. All reflection candidates route through Bridge MEMORY_COMMIT_AUTH and MEC adjudication. Curriculum advancement requires demonstrated learner evidence only — inferred comprehension is not a valid basis. Premature closure is the primary epistemic failure mode. The subagents.allowAgents: [] entry enforces the no-spawning constraint.
+
+**Authority:** Faheem, 2026-03-16.
