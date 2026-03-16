@@ -10,7 +10,13 @@ import type { CliDeps } from "../cli/deps.js";
 import type { OpenClawConfig } from "../config/config.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 
-export type InternalHookEventType = "command" | "session" | "agent" | "gateway" | "message";
+export type InternalHookEventType =
+  | "command"
+  | "session"
+  | "agent"
+  | "gateway"
+  | "message"
+  | "routing";
 
 export type AgentBootstrapHookContext = {
   workspaceDir: string;
@@ -418,4 +424,40 @@ export function isMessagePreprocessedEvent(
     return false;
   }
   return hasStringContextField(context, "channelId");
+}
+
+// ============================================================================
+// Routing Hook Events
+// ============================================================================
+
+export type RoutingPreRouteHookContext = {
+  /** Raw channel identifier from the routing input */
+  channel: string;
+  /** Provider account ID, if present */
+  accountId: string | null;
+  /** Peer (kind + id), if present */
+  peer: { kind: string; id: string } | null;
+  /** Guild ID, if present */
+  guildId: string | null;
+  /** Team ID, if present */
+  teamId: string | null;
+};
+
+export type RoutingPreRouteHookEvent = InternalHookEvent & {
+  type: "routing";
+  action: "pre-route";
+  context: RoutingPreRouteHookContext;
+};
+
+export function isRoutingPreRouteEvent(
+  event: InternalHookEvent,
+): event is RoutingPreRouteHookEvent {
+  if (!isHookEventTypeAndAction(event, "routing", "pre-route")) {
+    return false;
+  }
+  const context = getHookContext<RoutingPreRouteHookContext>(event);
+  if (!context) {
+    return false;
+  }
+  return hasStringContextField(context, "channel");
 }

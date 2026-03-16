@@ -3,6 +3,7 @@ import type { ChatType } from "../channels/chat-type.js";
 import { normalizeChatType } from "../channels/chat-type.js";
 import type { OpenClawConfig } from "../config/config.js";
 import { shouldLogVerbose } from "../globals.js";
+import { createInternalHookEvent, triggerInternalHook } from "../hooks/internal-hooks.js";
 import { logDebug } from "../logger.js";
 import { listBindings } from "./bindings.js";
 import {
@@ -612,6 +613,15 @@ function matchesBindingScope(match: NormalizedBindingMatch, scope: BindingScope)
 }
 
 export function resolveAgentRoute(input: ResolveAgentRouteInput): ResolvedAgentRoute {
+  void triggerInternalHook(
+    createInternalHookEvent("routing", "pre-route", "", {
+      channel: input.channel,
+      accountId: input.accountId ?? null,
+      peer: input.peer ?? null,
+      guildId: input.guildId ?? null,
+      teamId: input.teamId ?? null,
+    }),
+  );
   const channel = normalizeToken(input.channel);
   const accountId = normalizeAccountId(input.accountId);
   const peer = input.peer
