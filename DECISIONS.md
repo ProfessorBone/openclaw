@@ -479,3 +479,16 @@ bypass governance — it is simply a different access mechanism.
 **Rationale:** Gauge is the system's measurement and reporting agent. It reads telemetry through the Observability Layer query surface, computes metrics against locked formula definitions, and emits structured output for Bridge-governed delivery. It has measurement authority only. The subagents.allowAgents: [] entry enforces the constraint that Gauge does not spawn sub-agents. The enabled flag allows safe deactivation without removing the registry entry.
 
 **Authority:** Faheem, 2026-03-16.
+
+---
+
+## ADR-024 — Locus Registered as Named Agent in openclaw.json
+
+**Date:** 2026-03-16
+**Status:** Closed
+
+**Decision:** Locus is registered as a named agent entry in ~/.openclaw/openclaw.json under agents.list with agent ID 'locus', enabled: true, model claude-opus-4-6 (scaffolding runtime — Tier-2 SLM constraint governs operational deployment environment per PACS-PEAS-AGT2-001), isolated workspace at ~/.openclaw/workspace/locus/, agent directory at ~/.openclaw/agents/locus/, and subagents.allowAgents: [] enforcing the no-spawning constraint at the OpenClaw level.
+
+**Rationale:** Locus is the shared knowledge infrastructure for Continuum. It ingests designated artifacts, extracts entities and relationships under Tier-2 SLM constraint, maintains the persistent cross-domain knowledge graph, and surfaces connections on request. All graph writes route through Bridge MEMORY_COMMIT_AUTH and MEC adjudication. Contradiction surfacing routes through a separate contradiction review pathway. Graph-Schema.md prerequisite (PACS-ARCH-GRAPH-001 v1.0.0) is satisfied.
+
+**Authority:** Faheem, 2026-03-16.
