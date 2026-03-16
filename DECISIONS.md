@@ -440,3 +440,16 @@ bypass governance — it is simply a different access mechanism.
 **Rationale:** A single placeholder event cannot carry the semantic precision required for audit, calibration, and governance surfaces across four distinct actuators with different downstream consumers and routing behaviors. The Locus model's four-event registry is the correct implementation-grade specification.
 
 **Authority:** Faheem, 2026-03-16.
+
+---
+
+## ADR-021 — The Bridge Registered as Named Agent in openclaw.json
+
+**Date:** 2026-03-16
+**Status:** Closed
+
+**Decision:** The Bridge is registered as a named agent entry in ~/.openclaw/openclaw.json under agents.list with agent ID 'the-bridge', enabled: true, model claude-opus-4-6, isolated workspace at ~/.openclaw/workspace/the-bridge/, agent directory at ~/.openclaw/agents/the-bridge/, and subagents.allowAgents: [] enforcing the no-spawning constraint at the OpenClaw level.
+
+**Rationale:** The Bridge is the control-plane authority for Continuum. It requires a named, isolated agent registration separate from the default main agent. The subagents.allowAgents: [] entry enforces the identity-level constraint that The Bridge does not spawn sub-agents — routing to domain agents goes via A1 route_task, not via spawning. The enabled flag allows safe activation and deactivation without removing the registry entry.
+
+**Authority:** Faheem, 2026-03-16.
