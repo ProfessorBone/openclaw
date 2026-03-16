@@ -383,11 +383,42 @@ depending on ~/.claude.json.
 **Authority:** Faheem, 2026-03-15.
 
 ---
-## PENDING RATIONALE — 2026-03-15
-**File modified:** CLAUDE.md
-**Modified at:** 2026-03-15 20:45:48
-**Governance tier:** Architecture / Constitutional
-**Rationale:** REQUIRED — document the architectural decision that justifies
-this change before this session closes. Uncommitted pending rationale entries
-constitute a System Charter violation (no silent evolution rule).
-**Review required by:** Faheem
+
+## ADR-019 — MCP-First File Access Rule Added to CLAUDE.md
+**Date:** 2026-03-15
+**Status:** Closed
+
+**File modified:** CLAUDE.md at 20:45:48 on 2026-03-15
+
+**Decision:** Added MCP-First File Access section to CLAUDE.md establishing
+two rules: (1) when the obsidian-vault MCP server is Connected, all vault
+file reads must use read_text_file via the MCP interface — bash cat on vault
+paths is prohibited while MCP is active; (2) if obsidian-vault MCP tools
+are not available in a session, use the native Read tool with full absolute
+vault path as fallback — never block on MCP unavailability, surface the
+MCP issue to Faheem separately.
+
+**Rationale:** Claude Code was defaulting to bash cat commands for vault
+reads despite MCP being available, bypassing the governed MCP access layer
+and creating an unobservable access pathway. The rule closes this gap.
+The fallback clause was added because MCP tools intermittently fail to
+expose in sessions due to server lifecycle issues (see ADR-015), and
+blocking all vault access on MCP availability would halt build work
+unnecessarily. The native Read tool is a safe fallback that does not
+bypass governance — it is simply a different access mechanism.
+
+**Authority:** Faheem, 2026-03-15.
+
+---
+
+## ADR-018 — RAG Workflow Consistency Model: Conditional Qdrant Ingestion
+**Date:** 2026-03-16
+**Status:** Closed
+
+**Decision:** Qdrant ingestion for a designated artifact is conditional on at least one authorized Knowledge Graph entry that references the same source_artifact_id as the chunks being ingested. KG ingestion executes first. Qdrant ingestion proceeds only after at least one entity achieves authorization_outcome = authorized. If all KG candidates are rejected, Qdrant ingestion is cancelled. If all are held, ingestion is suspended until resolution.
+
+**Source:** Resolves the open design question explicitly deferred from Vector-Store-Selection.md Section 5 (PACS-DATA-VSS-001 v1.0.0).
+
+**Rationale:** Retrieval sequence integrity (Phase 1 must be able to identify the artifact before Phase 2 retrieves from it), governed ingestion principle (unverified content must not enter the active retrieval corpus), and Context Package coherence (cross-layer linkage requires matching source_artifact_id in both graph and vector stores).
+
+**Authority:** Faheem, 2026-03-16.
