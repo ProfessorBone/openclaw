@@ -69,11 +69,11 @@ Stage 1 — Infrastructure Foundation
 
 ### Tamper-Evident Audit Log
 
-- [ ] Design audit log storage (append-only, cryptographically verifiable)
-- [ ] Implement TC-BRIDGE-005 (emit_decision_log) as first actuator
+- [x] Design audit log storage (append-only, cryptographically verifiable) — COMPLETE. PACS-ARCH-AUDIT-001 v1.0.0 LOCKED.
+- [x] Implement TC-BRIDGE-005 (emit_decision_log) as first actuator — design complete. Hash-based chain, seven decision surfaces defined.
   - Source: Tool Contracts PACS-ARCH-TOOL-001, TC-BRIDGE-005
   - Timeout behavior: if write not confirmed within timeout window → Level 1 failure
-- [ ] Verify write-only access for The Bridge (cannot read, modify, or delete entries)
+- [x] Verify write-only access for The Bridge — write-only model specified in PACS-ARCH-AUDIT-001 Section 2.
 
 ### Stage 1 Exit Gate
 
