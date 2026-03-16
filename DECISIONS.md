@@ -505,3 +505,16 @@ bypass governance — it is simply a different access mechanism.
 **Rationale:** Crucible is Continuum's persistent mastery engine for the science and engineering of agentic systems. It delivers scientifically grounded instruction and evaluates tutoring effectiveness through a governed Reflexion loop. All reflection candidates route through Bridge MEMORY_COMMIT_AUTH and MEC adjudication. Curriculum advancement requires demonstrated learner evidence only — inferred comprehension is not a valid basis. Premature closure is the primary epistemic failure mode. The subagents.allowAgents: [] entry enforces the no-spawning constraint.
 
 **Authority:** Faheem, 2026-03-16.
+
+---
+
+## ADR-026 — Foundry Registered as Named Agent in openclaw.json
+
+**Date:** 2026-03-16
+**Status:** Closed
+
+**Decision:** Foundry is registered as a named agent entry in ~/.openclaw/openclaw.json under agents.list with agent ID 'foundry', enabled: true, model claude-opus-4-6, isolated workspace at ~/.openclaw/workspace/foundry/, agent directory at ~/.openclaw/agents/foundry/, and subagents.allowAgents: [] enforcing the no-spawning constraint at the OpenClaw runtime level. SOUL.md and AGENTS.md are provisioned at ~/.openclaw/agents/foundry/. The Bridge AGENTS.md governed registry is updated to mark Foundry ACTIVE with full routing eligibility.
+
+**Rationale:** Foundry is Continuum's engineering synthesis engine responsible for converting validated knowledge into governed PACS architectural artifacts. Three pre-conditions were required before Foundry scaffolding: Pre-condition A (pre-route hook in src/hooks/internal-hooks.ts and src/routing/resolve-route.ts, commit 5cd4f57c1), Pre-condition B (governed agent registry enforced at runtime via src/routing/governed-registry.ts, commit 7041f67fb), and Pre-condition C (Governed-Spawning-Pathway.md LOCKED as PACS-ARCH-SPAWN-001, commit 7921f171e). All three are complete. The subagents.allowAgents: [] entry enforces the no-spawning constraint. Sub-agent spawning requires explicit authorization under PACS-ARCH-SPAWN-001 before openclaw.json may be modified. Foundry does not select between options it generates — selection authority belongs to The Bridge. Silent absorption (detecting a conflict without surfacing it) is Foundry's named failure mode and is observable via I-002 SILENT_ABSORPTION_DETECTED.
+
+**Authority:** Faheem, 2026-03-16.
