@@ -1,8 +1,13 @@
 # STATE.md — Continuum Build State
+
 # Version: 1.0.0 | 2026-03-13
+
 #
+
 # DEPLOYMENT: Copy this file to the root of your Continuum repo.
+
 # Update it at the end of every build session.
+
 # Hook 2 (state-update.sh) appends activity automatically.
 
 ---
@@ -15,8 +20,8 @@ current_phase: Environment Bring-Up
 Phase 1 (Blueprint & Documentation) is COMPLETE. All Phase 1 artifacts are
 locked in the Obsidian vault at Projects/Faheem's PAC System/.
 
-last_action: RAG-Workflow.md written and locked — PACS-DATA-RWF-001 v1.0.0. Stage 1 Task 2 complete — all four Data Layer documents locked.
-next_action: Stage 1 Task 3 — OpenClaw installation and Gateway configuration
+last_action: Stage 1 Task 3 complete — OpenClaw installed, Gateway running as LaunchAgent on Mac Studio M3 Ultra (pid 30210, ws://127.0.0.1:18789, loopback, claude-opus-4-6).
+next_action: Stage 1 Task 4 — Telemetry pipeline design and GAP resolution (GAP-001 through GAP-005)
 last_updated: 2026-03-16 12:35:49
 
 ---
@@ -46,40 +51,40 @@ proceeding to Stage 2.
 
 ## Phase 2 Stage Tracker
 
-| Stage | Name | Status |
-|---|---|---|
-| Stage 1 | Infrastructure Foundation | IN PROGRESS |
-| Stage 2 | Agent Scaffolding | PENDING |
-| Stage 3 | Failure Injection Execution | PENDING |
-| Stage 4 | Operational Validation | PENDING |
-| Stage 5 | Production Onboarding | PENDING |
+| Stage   | Name                        | Status      |
+| ------- | --------------------------- | ----------- |
+| Stage 1 | Infrastructure Foundation   | IN PROGRESS |
+| Stage 2 | Agent Scaffolding           | PENDING     |
+| Stage 3 | Failure Injection Execution | PENDING     |
+| Stage 4 | Operational Validation      | PENDING     |
+| Stage 5 | Production Onboarding       | PENDING     |
 
 ---
 
 ## Agent Scaffolding Order (Stage 2)
 
-| Order | Agent | Status | Exit Gate |
-|---|---|---|---|
-| 1 | The Bridge | PENDING | Bridge mandatory injections pass |
-| 2 | MEC | PENDING | MEC mandatory injections pass |
-| 3 | Gauge | PENDING | Gauge mandatory injections pass |
-| 4 | Locus | PENDING | Graph-Schema.md exists; Locus injections pass |
-| 5 | Crucible | PENDING | Crucible injections pass |
-| 6 | Foundry | PENDING | Foundry injections pass |
-| 7 | Signal | PENDING | Signal injections pass |
-| 8 | Vault | PENDING | Vault injections pass; paper portfolio validated |
+| Order | Agent      | Status  | Exit Gate                                        |
+| ----- | ---------- | ------- | ------------------------------------------------ |
+| 1     | The Bridge | PENDING | Bridge mandatory injections pass                 |
+| 2     | MEC        | PENDING | MEC mandatory injections pass                    |
+| 3     | Gauge      | PENDING | Gauge mandatory injections pass                  |
+| 4     | Locus      | PENDING | Graph-Schema.md exists; Locus injections pass    |
+| 5     | Crucible   | PENDING | Crucible injections pass                         |
+| 6     | Foundry    | PENDING | Foundry injections pass                          |
+| 7     | Signal     | PENDING | Signal injections pass                           |
+| 8     | Vault      | PENDING | Vault injections pass; paper portfolio validated |
 
 ---
 
 ## Known Prerequisites Not Yet Built
 
-| Item | Blocks | Notes |
-|---|---|---|
-| Graph-Schema.md | Locus scaffolding | Define entity types, relationship types, domain tags, provenance record structure |
-| GAP-001: CONTRADICTION_DETECTED | INJ-013 injection test | Add to Locus-Event-Model.md |
-| GAP-002: CONFLICT_DETECTED | INJ-014 injection test | Add to Foundry-Event-Model.md |
-| GAP-003: ITEM_FILTERED | Signal harness full execution | Add to Signal-Event-Model.md |
-| GAP-004/005: Cross-agent stream access | Bridge + Locus harness execution | Confirm in Telemetry.md |
+| Item                                   | Blocks                           | Notes                                                                             |
+| -------------------------------------- | -------------------------------- | --------------------------------------------------------------------------------- |
+| Graph-Schema.md                        | Locus scaffolding                | Define entity types, relationship types, domain tags, provenance record structure |
+| GAP-001: CONTRADICTION_DETECTED        | INJ-013 injection test           | Add to Locus-Event-Model.md                                                       |
+| GAP-002: CONFLICT_DETECTED             | INJ-014 injection test           | Add to Foundry-Event-Model.md                                                     |
+| GAP-003: ITEM_FILTERED                 | Signal harness full execution    | Add to Signal-Event-Model.md                                                      |
+| GAP-004/005: Cross-agent stream access | Bridge + Locus harness execution | Confirm in Telemetry.md                                                           |
 
 ---
 
@@ -101,6 +106,7 @@ Authorization condition: 4 clean paper portfolio cycles + Faheem explicit re-aut
 ---
 
 ## Recent Activity
+
 - 2026-03-16 12:35:49 | Edit | /Users/faheem/Library/Mobile Documents/iCloud~md~obsidian/Documents/MyBrain/Projects/Faheem's PACS/10-Claude-Code-Implementation/Claude-Code-Opening-Prompt.md
 - 2026-03-16 12:35:42 | Edit | /Users/faheem/Library/Mobile Documents/iCloud~md~obsidian/Documents/MyBrain/Projects/Faheem's PACS/10-Claude-Code-Implementation/Claude-Code-Opening-Prompt.md
 - 2026-03-16 12:35:31 | Edit | /Users/faheem/Library/Mobile Documents/iCloud~md~obsidian/Documents/MyBrain/Projects/Faheem's PACS/10-Claude-Code-Implementation/Claude-Code-Opening-Prompt.md
@@ -142,4 +148,3 @@ Authorization condition: 4 clean paper portfolio cycles + Faheem explicit re-aut
 - 2026-03-14 16:40:28 | Edit | TASKS.md
 - 2026-03-14 16:40:18 | Edit | DECISIONS.md
 - 2026-03-14 16:37:57 | Edit | TASKS.md
-

@@ -1,8 +1,13 @@
 # TASKS.md — Continuum Active Work Queue
+
 # Version: 1.0.0 | 2026-03-13
+
 #
+
 # DEPLOYMENT: Copy this file to the root of your Continuum repo.
+
 # Update at the start and end of every build session.
+
 # Keep this focused on what is authorized for the CURRENT stage.
 
 ---
@@ -16,6 +21,7 @@ Stage 1 — Infrastructure Foundation
 ## Active Tasks (Stage 1)
 
 ### Immediate Priority
+
 - [x] Write Graph-Schema.md — entity types, relationship types, domain tags, provenance record structure
   - **Why now:** Locus cannot be scaffolded without it. Blocking dependency.
   - **Source:** Locus PEAS Section 5 cross-reference note
@@ -30,12 +36,25 @@ Stage 1 — Infrastructure Foundation
   - **Output location:** vault 03-Data-Layer/RAG-Workflow.md
 
 ### OpenClaw Setup
-- [ ] Install OpenClaw on Mac Studio M3 Ultra
-- [ ] Configure Gateway as The Bridge's home in OpenClaw
-- [ ] Verify per-agent workspace isolation (each agent: SOUL.md, AGENTS.md, USER.md, MEMORY.md)
-- [ ] Test heartbeat configuration (30 min default per OpenClaw docs)
+
+- [x] Install OpenClaw on Mac Studio M3 Ultra
+  - pnpm install: 1287 packages, 57.1s — COMPLETE
+  - pnpm build: 613 files in dist/, clean — COMPLETE
+  - pnpm openclaw onboard: Gateway configured, LaunchAgent installed — COMPLETE
+- [x] Configure Gateway as The Bridge's home in OpenClaw
+  - Gateway running at ws://127.0.0.1:18789, bound to loopback, port 18789
+  - LaunchAgent installed at ~/Library/LaunchAgents/ai.openclaw.gateway.plist
+  - Default model: claude-opus-4-6 (200k ctx), Anthropic API key configured
+  - openclaw.json at ~/.openclaw/openclaw.json
+- [x] Verify per-agent workspace isolation (each agent: SOUL.md, AGENTS.md, USER.md, MEMORY.md)
+  - Workspace confirmed at ~/.openclaw/workspace
+  - Agent main registered at ~/.openclaw/agents/main/
+  - Per-agent SOUL.md, AGENTS.md, USER.md population is Stage 2 work
+- [x] Test heartbeat configuration (30 min default per OpenClaw docs)
+  - Heartbeat: 30m (main) — confirmed in status output
 
 ### Telemetry Pipeline
+
 - [ ] Design telemetry event collection architecture
 - [ ] Add CONTRADICTION_DETECTED event to Locus-Event-Model.md (GAP-001)
 - [ ] Add CONFLICT_DETECTED event to Foundry-Event-Model.md (GAP-002)
@@ -44,6 +63,7 @@ Stage 1 — Infrastructure Foundation
 - [ ] Write Telemetry.md infrastructure spec (PACS-OBS-005 — currently PENDING)
 
 ### Tamper-Evident Audit Log
+
 - [ ] Design audit log storage (append-only, cryptographically verifiable)
 - [ ] Implement TC-BRIDGE-005 (emit_decision_log) as first actuator
   - Source: Tool Contracts PACS-ARCH-TOOL-001, TC-BRIDGE-005
@@ -51,6 +71,7 @@ Stage 1 — Infrastructure Foundation
 - [ ] Verify write-only access for The Bridge (cannot read, modify, or delete entries)
 
 ### Stage 1 Exit Gate
+
 - [ ] Run INJ-005: Audit chain integrity test
 - [ ] Run INJ-021: MEC fail-closed verification
 - [ ] Both pass → proceed to Stage 2
@@ -84,6 +105,7 @@ Stage 1 — Infrastructure Foundation
 ## Stage 2 Preview (after Stage 1 complete)
 
 Agent scaffolding in order:
+
 1. The Bridge — SOUL.md, AGENTS.md, tool wiring (A1–A5), event hooks
 2. MEC — constitutional enforcement layer
 3. Gauge — performance measurement layer
@@ -139,6 +161,7 @@ produces a signal. The MEC adjudicates what to do with that signal. Governance s
 is preserved.
 
 **Architecture:**
+
 - Primary deployment: MEC sensor S7 (scores protected decision candidates)
 - Secondary deployment: lightweight version at Bridge inbound envelope intercept point
   (first-pass filter before routing — obvious attacks caught before reaching the routing layer)
@@ -148,6 +171,7 @@ is preserved.
 MEC scaffolding is complete.
 
 **Implementation path (all local, zero cloud cost):**
+
 - Base model: Mistral 7B or Llama 3 8B via Ollama or Hugging Face
 - Fine-tuning framework: MLX (Apple's ML framework, native Apple Silicon)
 - Method: LoRA fine-tuning (20–30GB memory during training — well within Mac Studio M3 Ultra
@@ -159,6 +183,7 @@ MEC scaffolding is complete.
 - Total active effort: approximately 2 days spread across one week
 
 **Evaluation criteria before deployment:**
+
 - Precision and recall on held-out injection examples above defined threshold
 - False positive rate on clean Continuum traffic below defined threshold
 - Latency per classification acceptable for MEC real-time adjudication
@@ -170,5 +195,4 @@ read-only from the MEC's perspective — it produces scores, it does not execute
 
 ---
 
-*Continuum — Faheem's PAC System | Professor Bone Lab*
-
+_Continuum — Faheem's PAC System | Professor Bone Lab_
