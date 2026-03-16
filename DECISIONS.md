@@ -1,9 +1,15 @@
 # DECISIONS.md — Continuum Architectural Decision Log
+
 # Version: 1.0.0 | 2026-03-13
+
 #
+
 # DEPLOYMENT: Copy this file to the root of your Continuum repo.
+
 # Every change to a governance-tier file must produce an entry here.
+
 # Format: ADR-NNN (Architectural Decision Record)
+
 # "No silent evolution" — System Charter Section 8.
 
 ---
@@ -28,6 +34,7 @@ When you make a decision that affects architecture, add an ADR in this format:
 ---
 
 ## ADR-001 — OpenClaw CLAUDE.md Overwritten by Continuum Builder Doctrine
+
 Date: 2026-03-14
 Status: Accepted
 
@@ -50,6 +57,7 @@ Authority: Faheem, 2026-03-14.
 ---
 
 ## ADR-002
+
 **Title:** Claude Code as primary build tool for Phase 2
 **Date:** 2026-03-13
 **Status:** DECIDED
@@ -68,6 +76,7 @@ breadth during initial scaffolding.
 ---
 
 ## ADR-003
+
 **Title:** Hook-based governance enforcement for Continuum build environment
 **Date:** 2026-03-13
 **Status:** DECIDED
@@ -86,6 +95,7 @@ intentional — constitutional documents should be hard to modify casually.
 ---
 
 ## ADR-004
+
 **Title:** Five-stage build sequence with exit gates
 **Date:** 2026-03-13
 **Status:** DECIDED
@@ -105,6 +115,7 @@ entry gates must all pass before any real workload runs.
 ---
 
 ## ADR-005
+
 **Title:** Graph-Schema.md as Stage 1 prerequisite
 **Date:** 2026-03-13
 **Status:** DECIDED
@@ -120,10 +131,12 @@ It belongs in architecture/ in the repo.
 
 ---
 
-*Continuum — Faheem's PAC System | Professor Bone Lab*
+_Continuum — Faheem's PAC System | Professor Bone Lab_
 
 ---
+
 ## ADR-006 — state-update.sh flock replaced with mkdir-based lock
+
 Date: 2026-03-14
 Status: Accepted
 
@@ -150,7 +163,9 @@ macOS and Linux environments. No external install required.
 Authority: Faheem, 2026-03-14.
 
 ---
+
 ## ADR-007 — .claude/mcp-settings.json created, obsidian-vault server registered
+
 Date: 2026-03-14
 Status: Accepted
 
@@ -174,7 +189,9 @@ correct command.
 Authority: Faheem, 2026-03-14.
 
 ---
+
 ## ADR-008 — MCP config location corrected from .claude/mcp-settings.json to .mcp.json
+
 Date: 2026-03-14
 Status: Accepted
 
@@ -198,7 +215,9 @@ session start after VS Code reloads the project config.
 Authority: Faheem, 2026-03-14.
 
 ---
+
 ## ADR-009 — obsidian-vault MCP server scope changed from project to user
+
 Date: 2026-03-14
 Status: Accepted
 
@@ -217,7 +236,9 @@ bridge verification tests passed.
 Authority: Faheem, 2026-03-14.
 
 ---
+
 ## ADR-010 — CLAUDE.md updated: Execution Discipline section added
+
 Date: 2026-03-14
 Status: Accepted
 
@@ -236,18 +257,22 @@ constrained from the start.
 Authority: Faheem, 2026-03-14.
 
 ---
+
 ## ADR-011 — Architectural Reconnaissance Pass (Stage 6) — OpenClaw control surface mapped
+
 Date: 2026-03-14
 Status: Accepted
 
 Decision: Executed a full architectural reconnaissance pass on the OpenClaw
 codebase before writing any implementation code. Four artifacts produced:
+
 - continuum/recon/openclaw-host-map.md — canonical file paths confirmed
 - continuum/recon/control-surface-matrix.md — 8-row Continuum→OpenClaw mapping
 - continuum/recon/governance-insertion-points.md — 16 architectural questions answered
 - continuum/recon/integration-risk-register.md — three lowest-risk starting points
 
 Key findings:
+
 1. Routing interception requires a Core change — no pre-resolve hook exists in
    resolveAgentRoute() (src/routing/resolve-route.ts). Call site is actually
    src/plugin-sdk/inbound-envelope.ts:77, not server-chat.ts as initially inferred.
@@ -258,6 +283,7 @@ Key findings:
    system is src/hooks/internal-hooks.ts — these are distinct systems.
 
 Recommended implementation order from recon:
+
 1. Agent identities in openclaw.json + SOUL.md files (Config, zero code changes)
 2. Pre-route-resolution hook (Wrapper, 2 core file touches)
 3. Expanded hook event coverage (Wrapper, 4 additive inserts)
@@ -267,3 +293,101 @@ surfaces. This pass prevents reimplementing existing capability and prevents
 unnecessary core file modifications.
 
 Authority: Faheem, 2026-03-14.
+
+---
+
+## ADR-013 — .mcp.json Populated for VS Code Project-Scoped MCP Loading
+
+**Date:** 2026-03-15
+**Status:** Closed
+
+**Problem:** The obsidian-vault MCP server was registered user-scoped in
+~/.claude.json and confirmed Connected from the terminal. However, the
+VS Code extension does not reliably load the global user-scoped
+registration. It reads project-scoped configuration from .mcp.json at
+repo root. The existing .mcp.json contained an empty mcpServers object,
+so the vault tool did not appear in VS Code agent sessions.
+
+**Resolution:** .mcp.json at repo root populated with the obsidian-vault
+server entry using the same command and args as the user-scoped
+registration. Both registrations now point to the same server and vault
+path. The user-scoped registration in ~/.claude.json is retained as-is.
+
+**Server entry written:**
+
+- Server name: obsidian-vault
+- Command: npx
+- Args: -y, mcp-obsidian, vault base path
+- Vault base path: /Users/faheem/Library/Mobile Documents/iCloud~md~obsidian/Documents/MyBrain
+
+**Governance note:** Only obsidian-vault is present in .mcp.json at this
+stage. This is correct per the active-server policy in
+mcp-settings.json.md (PACS-IMPL-MCP-CFG-001): MCP Capability Phase 1
+permits obsidian-vault only. No other server may be added without a
+DECISIONS.md entry and architectural justification.
+
+**Authority:** Faheem, 2026-03-15.
+
+---
+
+## ADR-014 — enableAllProjectMcpServers Enabled in settings.local.json
+**Date:** 2026-03-15
+**Status:** Closed
+
+**Problem:** obsidian-vault MCP server was not appearing in VS Code agent
+sessions despite .mcp.json being correctly configured. Root cause identified
+as enableAllProjectMcpServers set to false in .claude/settings.local.json.
+This setting causes the VS Code Claude extension to ignore .mcp.json entirely
+regardless of its contents.
+
+**Resolution:** enableAllProjectMcpServers changed from false to true in
+.claude/settings.local.json. Project-scoped .mcp.json servers will now load
+correctly in VS Code agent sessions.
+
+**Authority:** Faheem, 2026-03-15.
+
+---
+
+## ADR-016 — Filesystem MCP Server Added to Claude Desktop Config
+**Date:** 2026-03-15
+**Status:** Closed
+
+**Decision:** Added filesystem MCP server to claude_desktop_config.json
+with /Users/faheem/openclaw and /Users/faheem/Projects as allowed paths.
+Binary updated to direct path /opt/homebrew/bin/mcp-server-filesystem
+to avoid npx ephemeral process instability (same root cause as ADR-015).
+obsidian-vault entry also updated to direct binary path for consistency.
+
+**Benefit:** Claude desktop sessions can now read repo files directly
+without requiring Claude Code to paste file contents into chat. Eliminates
+a full round trip from every file review workflow.
+
+**Authority:** Faheem, 2026-03-15.
+
+---
+
+## ADR-017 — Filesystem Server Added to .mcp.json for Claude Code Vault Access
+**Date:** 2026-03-15
+**Status:** Closed
+
+**Problem:** Claude Code CLI was loading the filesystem MCP server with only
+/Users/faheem/openclaw as an allowed directory because .mcp.json at repo root
+did not include the filesystem server. The vault path was only in ~/.claude.json
+which is overridden by the project-scoped .mcp.json when running from the repo.
+
+**Resolution:** Filesystem server entry added to .mcp.json with three allowed
+paths: /Users/faheem/openclaw, /Users/faheem/Projects, and the vault path.
+Claude Code now has vault access through the project-scoped config without
+depending on ~/.claude.json.
+
+**Authority:** Faheem, 2026-03-15.
+
+---
+## PENDING RATIONALE — 2026-03-15
+**File modified:** CLAUDE.md
+**Modified at:** 2026-03-15 20:45:48
+**Governance tier:** Architecture / Constitutional
+**Rationale:** REQUIRED — document the architectural decision that justifies
+this change before this session closes. Uncommitted pending rationale entries
+constitute a System Charter violation (no silent evolution rule).
+**Review required by:** Faheem

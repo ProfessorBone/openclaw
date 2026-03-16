@@ -1,3 +1,18 @@
 {
-  "mcpServers": {}
+  "mcpServers": {
+    "obsidian-vault": {
+      "command": "/opt/homebrew/bin/mcp-obsidian",
+      "args": [
+        "/Users/faheem/Library/Mobile Documents/iCloud~md~obsidian/Documents/MyBrain"
+      ]
+    },
+    "filesystem": {
+      "command": "/opt/homebrew/bin/mcp-server-filesystem",
+      "args": [
+        "/Users/faheem/openclaw",
+        "/Users/faheem/Projects",
+        "/Users/faheem/Library/Mobile Documents/iCloud~md~obsidian/Documents/MyBrain"
+      ]
+    }
+  }
 }

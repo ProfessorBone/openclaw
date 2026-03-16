@@ -16,10 +16,18 @@ Stage 1 — Infrastructure Foundation
 ## Active Tasks (Stage 1)
 
 ### Immediate Priority
-- [ ] Write Graph-Schema.md — entity types, relationship types, domain tags, provenance record structure
+- [x] Write Graph-Schema.md — entity types, relationship types, domain tags, provenance record structure
   - **Why now:** Locus cannot be scaffolded without it. Blocking dependency.
   - **Source:** Locus PEAS Section 5 cross-reference note
   - **Output location:** architecture/Graph-Schema.md
+- [x] Write Knowledge-Base-Design.md — all durable knowledge stores, access patterns, write governance
+  - **Output location:** vault 03-Data-Layer/Knowledge-Base-Design.md — PACS-DATA-KBD-001 v1.0.0 LOCKED
+- [x] Write Vector-Store-Selection.md — Qdrant selection, embedding model, collection design, governance constraints
+  - **Output location:** vault 03-Data-Layer/Vector-Store-Selection.md — PACS-DATA-VSS-001 v1.0.0 LOCKED
+- [ ] Write Chunking-Strategy.md — chunk size, overlap, segmentation rules for continuum_artifacts collection
+  - **Output location:** vault 03-Data-Layer/Chunking-Strategy.md
+- [ ] Write RAG-Workflow.md — operational retrieval sequence, graph + vector coordination, consistency model resolution
+  - **Output location:** vault 03-Data-Layer/RAG-Workflow.md
 
 ### OpenClaw Setup
 - [ ] Install OpenClaw on Mac Studio M3 Ultra

@@ -199,4 +199,10 @@ the action taken was technically correct.
 
 ---
 
+## MCP-First File Access
+
+If obsidian-vault MCP tools are not available in this session, use the native Read tool with the full absolute vault path: /Users/faheem/Library/Mobile Documents/iCloud~md~obsidian/Documents/MyBrain/ as the base. Never block on MCP unavailability — fall back to native Read and surface the MCP issue to Faheem separately.
+
+---
+
 *Continuum — Faheem's PAC System | Professor Bone Lab*
