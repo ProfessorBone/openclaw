@@ -92,6 +92,15 @@ export const ACTIVE_TAR_REGISTRY: readonly TarEntry[] = [
     status: "active",
     grant_required: false,
   },
+  {
+    capability_id: "TAR-003",
+    mcp_server_name: "obsidian-vault",
+    operation_names: ["edit_file"],
+    action_class: "side-effecting",
+    approved_agent_ids: ["the-bridge", "locus", "foundry"],
+    status: "active",
+    grant_required: true,
+  },
 ] as const;
 
 // ---------------------------------------------------------------------------
