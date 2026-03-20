@@ -101,6 +101,15 @@ export const ACTIVE_TAR_REGISTRY: readonly TarEntry[] = [
     status: "active",
     grant_required: true,
   },
+  {
+    capability_id: "TAR-006",
+    mcp_server_name: "filesystem",
+    operation_names: ["edit_file"],
+    action_class: "side-effecting",
+    approved_agent_ids: ["the-bridge", "foundry"],
+    status: "active",
+    grant_required: true,
+  },
 ] as const;
 
 // ---------------------------------------------------------------------------
