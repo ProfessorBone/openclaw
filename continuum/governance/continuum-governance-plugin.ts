@@ -21,6 +21,10 @@ import {
   tarRepoCreateBeforeToolCallHandler,
 } from "./tar-create-enforcement.js";
 import { registerTarHook } from "./tar-hook.js";
+import {
+  tarFilesystemReadBeforeToolCallHandler,
+  tarFilesystemListBeforeToolCallHandler,
+} from "./tar-read-enforcement.js";
 import { tarRepoWriteBeforeToolCallHandler } from "./tar-repo-enforcement.js";
 import { tarWriteBeforeToolCallHandler } from "./tar-write-enforcement.js";
 
@@ -53,9 +57,15 @@ const continuumGovernancePlugin: OpenClawPluginDefinition = {
     // Register TAR-008 repo create enforcement (filesystem write_file).
     api.on("before_tool_call", tarRepoCreateBeforeToolCallHandler, { priority: 96 });
 
+    // Register TAR-005 filesystem read enforcement (read_file / read_text_file).
+    api.on("before_tool_call", tarFilesystemReadBeforeToolCallHandler, { priority: 95 });
+
+    // Register TAR-007 filesystem list enforcement (list_directory / directory_tree).
+    api.on("before_tool_call", tarFilesystemListBeforeToolCallHandler, { priority: 94 });
+
     log.info(
       "Continuum Governance Plugin activated: " +
-        "TAR-001/002 read + TAR-003 vault write + TAR-006 repo write + TAR-004/008 create wired to before_tool_call pipeline",
+        "TAR-001-008 (all active) wired to before_tool_call pipeline",
     );
   },
 };
