@@ -16,6 +16,10 @@
 
 import { createSubsystemLogger } from "../../src/logging/subsystem.js";
 import type { OpenClawPluginApi, OpenClawPluginDefinition } from "../../src/plugins/types.js";
+import {
+  tarVaultCreateBeforeToolCallHandler,
+  tarRepoCreateBeforeToolCallHandler,
+} from "./tar-create-enforcement.js";
 import { registerTarHook } from "./tar-hook.js";
 import { tarRepoWriteBeforeToolCallHandler } from "./tar-repo-enforcement.js";
 import { tarWriteBeforeToolCallHandler } from "./tar-write-enforcement.js";
@@ -43,9 +47,15 @@ const continuumGovernancePlugin: OpenClawPluginDefinition = {
     // Priority 98 — runs after vault write check.
     api.on("before_tool_call", tarRepoWriteBeforeToolCallHandler, { priority: 98 });
 
+    // Register TAR-004 vault create enforcement (obsidian-vault write_file).
+    api.on("before_tool_call", tarVaultCreateBeforeToolCallHandler, { priority: 97 });
+
+    // Register TAR-008 repo create enforcement (filesystem write_file).
+    api.on("before_tool_call", tarRepoCreateBeforeToolCallHandler, { priority: 96 });
+
     log.info(
       "Continuum Governance Plugin activated: " +
-        "TAR-001/002 read + TAR-003 vault write + TAR-006 repo write (three-tier) wired to before_tool_call pipeline",
+        "TAR-001/002 read + TAR-003 vault write + TAR-006 repo write + TAR-004/008 create wired to before_tool_call pipeline",
     );
   },
 };
