@@ -1,0 +1,7 @@
+{
+  "id": "governance",
+  "name": "Continuum Governance",
+  "description": "Enforces Continuum architectural governance: TAR capability authorization, agent authorization checks, and invocation record emission for all MCP tool calls.",
+  "version": "1.0.0",
+  "configSchema": {}
+}

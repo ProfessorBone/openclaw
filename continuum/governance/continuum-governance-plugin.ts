@@ -31,7 +31,7 @@ import { tarWriteBeforeToolCallHandler } from "./tar-write-enforcement.js";
 const log = createSubsystemLogger("continuum/governance");
 
 const continuumGovernancePlugin: OpenClawPluginDefinition = {
-  id: "continuum-governance",
+  id: "governance",
   name: "Continuum Governance",
   description:
     "Enforces Continuum architectural governance: TAR capability authorization, " +

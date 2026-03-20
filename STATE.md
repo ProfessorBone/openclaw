@@ -22,7 +22,7 @@ locked in the Obsidian vault at Projects/Faheem's PAC System/.
 
 last_action: Foundry Pre-condition A complete: pre-route hook added to internal-hooks.ts and resolve-route.ts.
 next_action: Foundry Pre-condition B: governed agent registry enforced at runtime.
-last_updated: 2026-03-16 19:23:13
+last_updated: 2026-03-20 13:53:34
 
 ---
 
@@ -88,6 +88,32 @@ proceeding to Stage 2.
 
 ---
 
+## Work Order 6B — Runtime Integration Cleanup (2026-03-19)
+
+Three runtime issues patched in ~/.openclaw/openclaw.json:
+
+1. **Model config** — All agent model values updated to provider-qualified format
+   (`openai/gpt-5.4`, `openai/gpt-5.4-mini`). Bare strings were causing the
+   runtime to fall back incorrectly to the Anthropic provider.
+
+2. **apply_patch warning** — `tools.exec.applyPatch.enabled: true` added globally.
+   The coding profile includes `apply_patch` in its static allowlist; enabling it
+   removes the "unknown entries" warning at session start.
+
+3. **MCP tool visibility for The Bridge** — `tools.alsoAllow: ["group:plugins"]`
+   added to the-bridge's per-agent config. The global `tools.profile=coding`
+   produces a core-only allowlist that filters out all plugin/MCP tools before
+   TAR enforcement can fire. `alsoAllow` merges additively so core tools are
+   preserved.
+
+   **TEMPORARY BREADTH CHOICE**: `group:plugins` allows all registered plugin
+   tools. This is intentional for Work Order 6B to restore MCP visibility quickly
+   during runtime stabilization. Once the runtime is confirmed stable, this must
+   be narrowed to the exact MCP servers The Bridge requires (obsidian-vault,
+   filesystem). Do not leave `group:plugins` in place permanently.
+
+---
+
 ## Risks
 
 - Allowing implementation to outrun architectural clarity
@@ -106,6 +132,19 @@ Authorization condition: 4 clean paper portfolio cycles + Faheem explicit re-aut
 ---
 
 ## Recent Activity
+
+- 2026-03-20 13:53:34 | Edit | continuum/test/gateway-spot-check.ts
+- 2026-03-20 13:53:18 | Edit | continuum/test/gateway-spot-check.ts
+- 2026-03-20 12:46:57 | Write | continuum/test/gateway-spot-check.ts
+- 2026-03-20 01:17:40 | Edit | /Users/faheem/.openclaw/openclaw.json
+- 2026-03-20 01:17:36 | Edit | /Users/faheem/.openclaw/openclaw.json
+- 2026-03-20 01:17:32 | Edit | /Users/faheem/.openclaw/openclaw.json
+- 2026-03-20 01:17:28 | Edit | /Users/faheem/.openclaw/openclaw.json
+- 2026-03-20 01:17:24 | Edit | /Users/faheem/.openclaw/openclaw.json
+- 2026-03-20 01:17:20 | Edit | /Users/faheem/.openclaw/openclaw.json
+- 2026-03-20 01:17:17 | Edit | /Users/faheem/.openclaw/openclaw.json
+- 2026-03-20 01:17:12 | Edit | /Users/faheem/.openclaw/openclaw.json
+- 2026-03-20 01:17:07 | Edit | /Users/faheem/.openclaw/openclaw.json
 
 - 2026-03-16 19:23:13 | Edit | /Users/faheem/.openclaw/agents/the-bridge/AGENTS.md
 - 2026-03-16 19:23:05 | Edit | /Users/faheem/.openclaw/agents/the-bridge/AGENTS.md
