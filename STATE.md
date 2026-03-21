@@ -32,7 +32,7 @@ Stage 4: COMPLETE — all 6 workloads passed, coverage_rate=1.0, Stage 4 coverag
 
 last_action: Stage 4 COMPLETE. WL5 Vault (A3 emit_market_report, IQG fired, A6 silent, P3 compliant, cycle_id=8e6e5041). WL6 Gauge confirmed coverage_rate=1.0 (5/5 workloads), stage_4_coverage_gate=PASSED. DECISIONS.md 0 PENDING RATIONALE.
 next_action: Await Faheem authorization before beginning Stage 5 (Production Onboarding). Do not push until authorized.
-last_updated: 2026-03-21 14:34:56
+last_updated: 2026-03-21 14:54:36
 
 ---
 
@@ -165,6 +165,8 @@ Authorization condition: 4 clean paper portfolio cycles + Faheem explicit re-aut
 ---
 
 ## Recent Activity
+
+- 2026-03-21 14:54:36 | Edit | .gitignore
 
 - 2026-03-21 14:34:56 | Edit | continuum/test/stage4-wl1-wl4-rerun.ts
 - 2026-03-21 14:34:56 | Edit | continuum/test/stage4-wl5-vault-wl6-gauge.ts

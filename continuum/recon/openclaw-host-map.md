@@ -1,4 +1,5 @@
 # OpenClaw Host Map — Step 1 File Listing
+
 **Artifact ID:** PACS-IMPL-RECON-001-S1
 **Version:** 1.0.0 | 2026-03-14
 **Source:** Architectural Reconnaissance Pass — Stage 6
@@ -7,18 +8,18 @@
 
 ## Files Read (in order)
 
-| # | Requested Path | Canonical Path (as read) | Notes |
-|---|---|---|---|
-| 1 | src/routing/bindings.ts | src/routing/bindings.ts | Path confirmed |
-| 2 | src/routing/resolve-route.ts | src/routing/resolve-route.ts | Path confirmed |
-| 3 | src/gateway/agent-prompt.ts | src/gateway/agent-prompt.ts | **Scope correction — see note below** |
-| 4 | src/gateway/exec-approval-manager.ts | src/gateway/exec-approval-manager.ts | Path confirmed |
-| 5 | src/gateway/hooks.ts | src/gateway/hooks.ts | **Scope correction — see note below** |
-| 6 | src/gateway/node-command-policy.ts | src/gateway/node-command-policy.ts | Path confirmed |
-| 7 | src/agents/agent-scope.ts | src/agents/agent-scope.ts | Path confirmed |
-| 8 | src/agents/bootstrap-hooks.ts | src/agents/bootstrap-hooks.ts | Path confirmed |
-| 9 | src/agents/skills/ | src/agents/skills/ (directory + types file) | Directory listing + index/types file read |
-| 10 | src/memory/ | src/memory/ (directory + manager.ts) | Directory listing + src/memory/manager.ts read as primary module |
+| #   | Requested Path                       | Canonical Path (as read)                    | Notes                                                            |
+| --- | ------------------------------------ | ------------------------------------------- | ---------------------------------------------------------------- |
+| 1   | src/routing/bindings.ts              | src/routing/bindings.ts                     | Path confirmed                                                   |
+| 2   | src/routing/resolve-route.ts         | src/routing/resolve-route.ts                | Path confirmed                                                   |
+| 3   | src/gateway/agent-prompt.ts          | src/gateway/agent-prompt.ts                 | **Scope correction — see note below**                            |
+| 4   | src/gateway/exec-approval-manager.ts | src/gateway/exec-approval-manager.ts        | Path confirmed                                                   |
+| 5   | src/gateway/hooks.ts                 | src/gateway/hooks.ts                        | **Scope correction — see note below**                            |
+| 6   | src/gateway/node-command-policy.ts   | src/gateway/node-command-policy.ts          | Path confirmed                                                   |
+| 7   | src/agents/agent-scope.ts            | src/agents/agent-scope.ts                   | Path confirmed                                                   |
+| 8   | src/agents/bootstrap-hooks.ts        | src/agents/bootstrap-hooks.ts               | Path confirmed                                                   |
+| 9   | src/agents/skills/                   | src/agents/skills/ (directory + types file) | Directory listing + index/types file read                        |
+| 10  | src/memory/                          | src/memory/ (directory + manager.ts)        | Directory listing + src/memory/manager.ts read as primary module |
 
 ---
 
@@ -62,5 +63,5 @@ This file defines `InternalHookEventType`, `triggerInternalHook()`, and the even
 
 ---
 
-*Continuum — Faheem's PAC System | Professor Bone Lab*
-*Reconnaissance Pass — Stage 6 | 2026-03-14*
+_Continuum — Faheem's PAC System | Professor Bone Lab_
+_Reconnaissance Pass — Stage 6 | 2026-03-14_

@@ -1,4 +1,5 @@
 # Integration Risk Register — Three Lowest-Risk Starting Points
+
 **Artifact ID:** PACS-IMPL-RECON-001-S4
 **Version:** 1.0.0 | 2026-03-14
 **Source:** Architectural Reconnaissance Pass — Stage 6, Step 4
@@ -8,6 +9,7 @@
 ## Selection Criteria
 
 Each starting point was selected to satisfy all three criteria simultaneously:
+
 1. Delivers the highest governance value to Continuum
 2. Requires the fewest core source file modifications
 3. Is most consistent with the repo's existing design language
@@ -21,6 +23,7 @@ Each starting point was selected to satisfy all three criteria simultaneously:
 ### What it achieves
 
 Gives the Bridge the ability to intercept and override agent routing decisions before they are committed. Enables:
+
 - Policy-based routing re-assignment (Bridge can redirect a message to a different agent)
 - Audit of all routing decisions before execution
 - Bridge-enforced escalation (e.g., route to Vault if message triggers a risk condition)
@@ -30,11 +33,11 @@ Without this, routing is a black box from the Bridge's perspective — decisions
 
 ### Files touched
 
-| File | Change type | Change description |
-|---|---|---|
-| `src/hooks/internal-hooks.ts` | Core change (additive) | Add `"routing"` to `InternalHookEventType` union; add `RoutingPreResolveHookEvent` context type |
-| `src/routing/resolve-route.ts` | Core change (additive) | Insert `triggerInternalHook()` call at line 614, before tiered matching begins |
-| `src/plugins/hooks.ts` | Additive | Ensure plugin hook-runner recognizes and dispatches new `routing` event type |
+| File                           | Change type            | Change description                                                                              |
+| ------------------------------ | ---------------------- | ----------------------------------------------------------------------------------------------- |
+| `src/hooks/internal-hooks.ts`  | Core change (additive) | Add `"routing"` to `InternalHookEventType` union; add `RoutingPreResolveHookEvent` context type |
+| `src/routing/resolve-route.ts` | Core change (additive) | Insert `triggerInternalHook()` call at line 614, before tiered matching begins                  |
+| `src/plugins/hooks.ts`         | Additive               | Ensure plugin hook-runner recognizes and dispatches new `routing` event type                    |
 
 **Total core files modified: 2** (`internal-hooks.ts`, `resolve-route.ts`)
 
@@ -62,11 +65,13 @@ Without this, routing is a black box from the Bridge's perspective — decisions
 ### What it achieves
 
 Adds hook triggers for events currently unobservable by plugins:
+
 - `tool:pre-execute` — fires before any tool invocation
 - `memory:pre-sync` — fires before memory write commits
 - `prompt:pre-assemble` — fires before system prompt is assembled
 
 Creates a comprehensive agent behavior observability surface. Directly enables:
+
 - Signal agent to observe all agent activity without polling
 - Gauge agent to capture timing and event data for all lifecycle phases
 - Bridge to receive notifications of tool invocations in real time
@@ -76,12 +81,12 @@ Does not change any logic — only adds notification points. Existing behavior i
 
 ### Files touched
 
-| File | Change type | Change description |
-|---|---|---|
-| `src/hooks/internal-hooks.ts` | Core change (additive) | Expand `InternalHookEventType` union; add context types for `tool`, `memory`, `prompt` events |
-| `src/gateway/node-invoke-system-run-approval.ts` | Core change (additive) | Insert `tool:pre-execute` hook trigger ~line 30, before approval gate |
-| `src/agents/system-prompt.ts` | Core change (additive) | Insert `prompt:pre-assemble` hook trigger ~line 50, before assembly begins |
-| `src/memory/manager.ts` | Core change (additive) | Insert `memory:pre-sync` hook trigger ~line 72, before `sync()` commits |
+| File                                             | Change type            | Change description                                                                            |
+| ------------------------------------------------ | ---------------------- | --------------------------------------------------------------------------------------------- |
+| `src/hooks/internal-hooks.ts`                    | Core change (additive) | Expand `InternalHookEventType` union; add context types for `tool`, `memory`, `prompt` events |
+| `src/gateway/node-invoke-system-run-approval.ts` | Core change (additive) | Insert `tool:pre-execute` hook trigger ~line 30, before approval gate                         |
+| `src/agents/system-prompt.ts`                    | Core change (additive) | Insert `prompt:pre-assemble` hook trigger ~line 50, before assembly begins                    |
+| `src/memory/manager.ts`                          | Core change (additive) | Insert `memory:pre-sync` hook trigger ~line 72, before `sync()` commits                       |
 
 **Total core files modified: 4** (all additive inserts only)
 
@@ -107,6 +112,7 @@ Does not change any logic — only adds notification points. Existing behavior i
 ### What it achieves
 
 Registers all seven Continuum agents in `openclaw.json` and provisions their workspace identity files before any code is written. Establishes:
+
 - Agent IDs and model assignments for Bridge, Crucible, Locus, Foundry, Signal, Gauge, Vault
 - Routing bindings for each agent (which channels/accounts route to which agent)
 - Constitutional identity (SOUL.md) for each agent
@@ -116,17 +122,17 @@ This is a prerequisite for all subsequent Continuum work. No other implementatio
 
 ### Files touched
 
-| File | Change type | Change description |
-|---|---|---|
-| `openclaw.json` | Config | Add seven agent entries with IDs, model config, and routing bindings |
-| `agents/bridge/SOUL.md` | New file | Bridge constitutional identity and governance authority declaration |
-| `agents/crucible/SOUL.md` | New file | Crucible identity (execution agent) |
-| `agents/locus/SOUL.md` | New file | Locus identity (research agent) |
-| `agents/foundry/SOUL.md` | New file | Foundry identity (builder agent — this session) |
-| `agents/signal/SOUL.md` | New file | Signal identity (communication agent) |
-| `agents/gauge/SOUL.md` | New file | Gauge identity (observability agent) |
-| `agents/vault/SOUL.md` | New file | Vault identity (memory/state agent) |
-| `agents/[name]/AGENTS.md` | New files | Per-agent capability declarations (7 files) |
+| File                      | Change type | Change description                                                   |
+| ------------------------- | ----------- | -------------------------------------------------------------------- |
+| `openclaw.json`           | Config      | Add seven agent entries with IDs, model config, and routing bindings |
+| `agents/bridge/SOUL.md`   | New file    | Bridge constitutional identity and governance authority declaration  |
+| `agents/crucible/SOUL.md` | New file    | Crucible identity (execution agent)                                  |
+| `agents/locus/SOUL.md`    | New file    | Locus identity (research agent)                                      |
+| `agents/foundry/SOUL.md`  | New file    | Foundry identity (builder agent — this session)                      |
+| `agents/signal/SOUL.md`   | New file    | Signal identity (communication agent)                                |
+| `agents/gauge/SOUL.md`    | New file    | Gauge identity (observability agent)                                 |
+| `agents/vault/SOUL.md`    | New file    | Vault identity (memory/state agent)                                  |
+| `agents/[name]/AGENTS.md` | New files   | Per-agent capability declarations (7 files)                          |
 
 **Total core files modified: 0**
 
@@ -148,15 +154,15 @@ This is a prerequisite for all subsequent Continuum work. No other implementatio
 
 ## Recommended Execution Order
 
-| Order | Starting Point | Rationale |
-|---|---|---|
-| First | #3 — Agent identities (Config) | Zero risk; prerequisite for everything else; can be done now |
-| Second | #1 — Pre-route hook (Wrapper) | Highest governance value; only 2 core file touches |
-| Third | #2 — Expanded hooks (Wrapper) | Broadest observability gain; 4 additive inserts; builds on hook pattern established by #1 |
+| Order  | Starting Point                 | Rationale                                                                                 |
+| ------ | ------------------------------ | ----------------------------------------------------------------------------------------- |
+| First  | #3 — Agent identities (Config) | Zero risk; prerequisite for everything else; can be done now                              |
+| Second | #1 — Pre-route hook (Wrapper)  | Highest governance value; only 2 core file touches                                        |
+| Third  | #2 — Expanded hooks (Wrapper)  | Broadest observability gain; 4 additive inserts; builds on hook pattern established by #1 |
 
 Execute #3 before any code work begins. Execute #1 and #2 after agent identities are stable.
 
 ---
 
-*Continuum — Faheem's PAC System | Professor Bone Lab*
-*Reconnaissance Pass — Stage 6 | 2026-03-14*
+_Continuum — Faheem's PAC System | Professor Bone Lab_
+_Reconnaissance Pass — Stage 6 | 2026-03-14_
