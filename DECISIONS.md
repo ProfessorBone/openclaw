@@ -715,3 +715,55 @@ Two alternatives were considered and rejected:
 - System Charter Section 6 (Financial Governance Principles): VLT-002 (strategic recommendations must pass the Intelligence Quality Gate) and VLT-006 (retirement and trading partitions must remain structurally separated at the perceptual level)
 - System Charter Section 9 (Non-Negotiables): G-002 deny list includes all nine Charter Section 9 items; execution_occurred: false is a structural guarantee, not a logged assertion
 - System Charter Section 3 (governance directionality): MEC-004 enforces the principle that configuration authority flows from Faheem through The Bridge; external services may not push configuration without an explicit Faheem authorization record
+
+---
+
+## ADR-034 — Level 2 Governance Process Failure Detection Modules Added for Round 3 Validation
+
+**Date:** 2026-03-21
+**PENDING entries resolved:** brdg-004-silent-violation.ts 11:58:57, brdg-002-untraced-routing.ts 11:59:12, brdg-007-mec-003-memory-auth.ts 11:59:33, gau-006-suppressed-anomaly.ts 11:59:52, gau-002-formula-drift.ts 12:00:11, gau-001-coverage-gap.ts 12:00:30, cru-002-reflection-evidence.ts 12:02:52, sig-005-deposit-pathway.ts 12:03:06, loc-001-graph-auth.ts 12:03:21, gau-002-formula-drift.ts 12:07:54 (implementation correction — see below)
+
+**What changed:**
+Nine focused detection modules were added, one per Level 2 governance process failure rule validated in PACS-VALIDATION-001 Round 3 (INJ-006, INJ-007, INJ-008, INJ-009, INJ-010, INJ-011, INJ-012, INJ-019, INJ-020):
+
+- `brdg-004-silent-violation.ts` — `Brdg004SilentViolationDetector`: detects POLICY_VIOLATION_DETECTED events with no paired ESCALATION_CANDIDATE_FORMED within a report cycle window. Emits ANOMALY_ALERT_EMITTED (rule_id: BRDG-004, producer: Gauge, bridge_notified: true, anomaly_type: SILENT_VIOLATION). Window is closed by explicit `checkWindowExpiry(tick)` call. Implements silent violation surface (INJ-006).
+
+- `brdg-002-untraced-routing.ts` — `Brdg002UntracedRoutingDetector`: detects ROUTING_DECISION_EXECUTED events with no paired ROUTING_DECISION_FORMED in the decision registry. Emits ANOMALY_ALERT_EMITTED (rule_id: BRDG-002, producer: Bridge, bridge_notified: true, anomaly_alert_emitted: true). Coverage rate is computed as (executed − untraced) / executed. Implements untraced routing detection (INJ-007).
+
+- `brdg-007-mec-003-memory-auth.ts` — `Brdg007Mec003MemoryAuthDetector`: detects MEMORY_WRITE_EXECUTED events with no valid `commit_token` in the adjudication registry. One event fires two rule outputs: BRDG-007 (producer: Bridge, bridge_notified: true) and MEC-003 (producer: MEC, bypass_bridge: true). Only approved adjudication tokens are registered. Implements memory commit authorization enforcement (INJ-008).
+
+- `gau-006-suppressed-anomaly.ts` — `Gau006SuppressedAnomalyDetector`: detects threshold crossings where no ANOMALY_ALERT_EMITTED is registered within the surfacing window. Emits GOVERNANCE_ESCALATION_EMITTED (rule_id: GAU-006, producer: Gauge, bridge_notified: true, suppressed_anomaly: true). Window closed by `checkWindowExpiry(tick)`. Implements suppressed anomaly detection (INJ-009).
+
+- `gau-002-formula-drift.ts` — `Gau002FormulaVersionDetector`: detects PERFORMANCE_REPORT_EMITTED events referencing a formula_version that does not match the locked registry entry for that metric_id. `LOCKED_FORMULA_REGISTRY` is hardcoded: `{ portfolio_sharpe_ratio: { current_version: "v3" }, strategy_confidence_score: { current_version: "v2" }, drawdown_risk_index: { current_version: "v1" } }`. Matching is exact string comparison only. Emits GOVERNANCE_ESCALATION_EMITTED (rule_id: GAU-002, producer: Gauge, bridge_notified: true) with `stale_metrics: StaleMetricEntry[]`. Implements formula version drift detection (INJ-010).
+
+- `gau-001-coverage-gap.ts` — `Gau001CoverageGapDetector`: detects when one or more registered active agents produce no telemetry for a full report cycle. Expected agents are registered via `registerActiveAgents()`; reported agents accumulate via `registerTelemetry()`. `checkWindowExpiry(tick)` closes the cycle, identifies absent agents, fires GAU-001 if any are absent, then resets the reported set for the next cycle. Alert includes `absent_agents: string[]` and `coverage_rate`. Implements coverage gap detection (INJ-011).
+
+- `cru-002-reflection-evidence.ts` — `Cru002ReflectionEvidenceDetector`: detects REFLECTION_CANDIDATE_FORMED events where `learner_evidence_used` is null, undefined, or an empty array. Emits GOVERNANCE_ESCALATION_EMITTED (rule_id: CRU-002, producer: Crucible, bridge_notified: true). Result includes `null_reflection_count` and `evidence_linked_rate = (total − null) / total`. Implements reflection evidence enforcement (INJ-012).
+
+- `sig-005-deposit-pathway.ts` — `Sig005DepositPathwayDetector`: detects BRIEF_DEPOSITED events where `deposit_target` is not `"exogenous_intelligence_intake_queue"` (`AUTHORIZED_DEPOSIT_TARGET`). Emits GOVERNANCE_ESCALATION_EMITTED (rule_id: SIG-005, producer: Signal, bridge_notified: true) with `actual_target` and `authorized_target`. Result includes `deposit_pathway_compliance_rate`. Implements deposit pathway integrity enforcement (INJ-019).
+
+- `loc-001-graph-auth.ts` — `Loc001GraphAuthDetector`: detects GRAPH_WRITE_EXECUTED events with no paired GRAPH_WRITE_AUTHORIZED bearing a matching `write_id`. Emits GOVERNANCE_ESCALATION_EMITTED (rule_id: LOC-001, producer: Locus, bridge_notified: true, unauthorized_write: true). Result includes `unauthorized_write_rate`. Implements graph write authorization enforcement (INJ-020).
+
+**Implementation correction (absorbed into this ADR):**
+The second PENDING entry for `gau-002-formula-drift.ts` (12:07:54) is not a new architectural decision. It corrects a JavaScript object shorthand error in `checkPerformanceReport()` introduced during initial authoring: `stale_metrics,` was written as a shorthand property reference but the local variable is named `staleMetrics` (camelCase), causing a `ReferenceError` at runtime. The fix — `stale_metrics: staleMetrics,` — is a correction within the same decision surface. The GAU-002 detection contract, the locked formula registry shape, and the alert structure are unchanged.
+
+**Why grouped as one ADR:**
+All nine modules belong to Round 3 Level 2 governance process failure validation. They were authored together as a single architectural deliverable — the detection surface layer required before PACS-VALIDATION-001 Round 3 injections could execute. They share one architectural concern: extending the governance detection surface to cover the nine Level 2 process boundaries that Round 3 tests. Splitting them across nine ADRs would fragment the decision record without adding clarity. The `gau-002` bug-fix write has no independent architectural content and is absorbed into the same ADR rather than generating a tenth entry.
+
+**Why smallest safe patch:**
+One detector class per rule, no generalized speculative detection framework. Each class exposes exactly the interface its corresponding injection test requires: one or two `check*()`/`register*()` methods, `checkWindowExpiry(tick)` where the rule is time-window-based, `_resetForTesting()`, and a singleton export. No logic is shared across detectors. The nine rules operate on different event types, different payload shapes, and different producers (Bridge, MEC, Gauge, Crucible, Signal, Locus). Factoring a common base class would couple unrelated governance surfaces and obscure the per-rule constitutional trace. The combined module `brdg-007-mec-003-memory-auth.ts` is the sole deliberate coupling: BRDG-007 and MEC-003 share a causal surface — one MEMORY_WRITE_EXECUTED event triggers both rule outputs — so separation would require duplicate event routing with no architectural benefit.
+
+**Alternatives rejected:**
+Two alternatives were considered and rejected:
+
+1. _Monolithic detector_ — a single class handling all nine rules. Rejected because the nine rules have no shared state, no shared event types, and no shared escalation pathway. A monolithic class would be harder to test in isolation (each injection test resets only its detector) and would make the per-rule governance trace unreadable.
+
+2. _Embedding detection logic in `continuum-governance-plugin.ts`_ — adding inline checks inside the plugin's hook handlers. Rejected because the plugin is a Layer 2 orchestration artifact (enforcement wiring and hook registration). Detection logic belongs in named, testable governance modules with their own decision records. Embedding it in the plugin would conflate the detection surface with the enforcement wiring surface, making both harder to test and evolve independently.
+
+**Architectural trace:**
+
+- PACS-VALIDATION-001 Round 3 — INJ-006 (BRDG-004 silent violation), INJ-007 (BRDG-002 untraced routing), INJ-008 (BRDG-007/MEC-003 memory auth), INJ-009 (GAU-006 suppressed anomaly), INJ-010 (GAU-002 formula drift), INJ-011 (GAU-001 coverage gap), INJ-012 (CRU-002 reflection evidence), INJ-019 (SIG-005 deposit pathway), INJ-020 (LOC-001 graph write authorization): each module is the detection surface required for its corresponding injection test
+- PACS-IMPL-STAGE3-001: Round 3 detection modules follow the same singleton-class pattern established in Stage 3 Round 1 and Round 2; no new architectural patterns introduced
+- ARCH-ADR-003 and PACS-VALIDATION-001: Level 2 process failures escalate through the normal governance path (bridge_notified) rather than direct bypass, unless a higher-level constitutional breach is separately detected.
+- System Charter Section 3 (governance directionality): BRDG-002 and BRDG-007/MEC-003 enforce that routing decisions and memory writes must trace to authorized Bridge adjudication records; untraced execution is a process failure regardless of outcome
+- System Charter Section 4 (observability requirements): GAU-001 and GAU-006 enforce that active agents must produce telemetry and that threshold crossings must surface as anomaly alerts; suppression or silence in the reporting cycle is a governance process failure
