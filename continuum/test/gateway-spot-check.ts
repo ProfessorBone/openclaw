@@ -32,6 +32,12 @@ import {
   createGatewayWsClient,
   type GatewayResFrame,
 } from "../../scripts/dev/gateway-ws-client.ts";
+import { buildDeviceAuthPayloadV3 } from "../../src/gateway/device-auth.ts";
+import {
+  loadOrCreateDeviceIdentity,
+  publicKeyRawBase64UrlFromPem,
+  signDevicePayload,
+} from "../../src/infra/device-identity.ts";
 
 // ---------------------------------------------------------------------------
 // Config
@@ -137,7 +143,7 @@ async function submitAgentTask(params: {
     {
       sessionKey,
       idempotencyKey,
-      input: { type: "message", role: "user", content: prompt },
+      message: prompt,
     },
     15_000,
   );
@@ -176,10 +182,21 @@ async function main() {
   console.log(`Gateway: ${GATEWAY_URL}`);
   console.log(`Session: ${SESSION_KEY}`);
 
+  // Capture the connect.challenge nonce so we can sign a device identity.
+  let resolveChallenge!: (nonce: string) => void;
+  const challengePromise = new Promise<string>((resolve) => {
+    resolveChallenge = resolve;
+  });
+
   const { ws, request, waitOpen, close } = createGatewayWsClient({
     url: GATEWAY_URL,
     onEvent: (evt) => {
-      if (evt.event !== "connect.challenge") {
+      if (evt.event === "connect.challenge") {
+        const nonce = (evt.payload as { nonce?: unknown } | null | undefined)?.nonce;
+        if (typeof nonce === "string") {
+          resolveChallenge(nonce);
+        }
+      } else {
         console.log(`  [event] ${evt.event}`);
       }
     },
@@ -188,24 +205,66 @@ async function main() {
   await waitOpen();
   console.log("WebSocket open");
 
+  // Wait for the challenge nonce (gateway sends it immediately on connect).
+  const nonce = await Promise.race([
+    challengePromise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("connect.challenge timeout")), 5_000),
+    ),
+  ]);
+
+  // Load the paired device identity and sign the connect payload so the gateway
+  // grants scopes from the paired device record (operator.admin) rather than
+  // clearing them (which happens for device-less shared-token connects).
+  const identity = loadOrCreateDeviceIdentity();
+  const signedAtMs = Date.now();
+  // Must match the metadata the device was originally paired with:
+  // paired.json: clientId="gateway-client", clientMode="ui", platform="darwin"
+  const CLIENT_ID = "gateway-client" as const;
+  const CLIENT_MODE = "ui" as const;
+  const CLIENT_PLATFORM = "darwin" as const;
+  const CONNECT_SCOPES = ["operator.admin"] as const;
+
+  const devicePayload = buildDeviceAuthPayloadV3({
+    deviceId: identity.deviceId,
+    clientId: CLIENT_ID,
+    clientMode: CLIENT_MODE,
+    role: "operator",
+    scopes: [...CONNECT_SCOPES],
+    signedAtMs,
+    token: TOKEN,
+    nonce,
+    platform: CLIENT_PLATFORM,
+    deviceFamily: undefined,
+  });
+
+  const device = {
+    id: identity.deviceId,
+    publicKey: publicKeyRawBase64UrlFromPem(identity.publicKeyPem),
+    signature: signDevicePayload(identity.privateKeyPem, devicePayload),
+    signedAt: signedAtMs,
+    nonce,
+  };
+
   // Authenticate
   const connectRes = await request("connect", {
     minProtocol: 3,
     maxProtocol: 3,
     client: {
-      id: "tar-spot-check",
+      id: CLIENT_ID,
       displayName: "TAR-005 spot check",
       version: "dev",
-      platform: "dev",
-      mode: "ui",
+      platform: CLIENT_PLATFORM,
+      mode: CLIENT_MODE,
       instanceId: "tar-spot-check",
     },
     locale: "en-US",
     userAgent: "gateway-spot-check",
     role: "operator",
-    scopes: ["operator.read", "operator.write", "operator.admin"],
+    scopes: [...CONNECT_SCOPES],
     caps: [],
     auth: { token: TOKEN },
+    device,
   });
 
   if (!connectRes.ok) {

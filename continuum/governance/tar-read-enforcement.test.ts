@@ -23,6 +23,7 @@ import {
   isWithinAuthorizedScope,
   isVaultFallbackPath,
   enforceReadBeforeToolCall,
+  tarFilesystemReadBeforeToolCallHandler,
 } from "./tar-read-enforcement.js";
 
 // ---------------------------------------------------------------------------
@@ -269,5 +270,50 @@ describe("enforceReadBeforeToolCall — TAR-007 (filesystem listing)", () => {
     });
     expect(result.allowed).toBe(false);
     expect(result.denialReason).toBe("scope_violation");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Native "read" tool hook handler tests (TAR-005 path, Work Order 4E fix)
+// ---------------------------------------------------------------------------
+
+describe("tarFilesystemReadBeforeToolCallHandler — native read tool", () => {
+  const CTX = {
+    agentId: "foundry",
+    sessionKey: "agent:foundry:main",
+    sessionId: "test-session",
+    runId: "test-run",
+    toolName: "read",
+  };
+
+  it("denies native read tool with Desktop file_path (scope_violation)", async () => {
+    const event = {
+      toolName: "read",
+      params: { file_path: "/Users/faheem/Desktop/spot-check-tar005.txt" },
+    };
+    const result = await tarFilesystemReadBeforeToolCallHandler(event, CTX);
+    expect(result).toBeDefined();
+    expect(result?.block).toBe(true);
+    expect(result?.blockReason).toContain("scope_violation");
+    expect(result?.blockReason).toContain("TAR-005");
+    expect(result?.blockReason).toContain("foundry");
+  });
+
+  it("allows native read tool with in-scope file_path", async () => {
+    const event = {
+      toolName: "read",
+      params: { file_path: "/Users/faheem/openclaw/STATE.md" },
+    };
+    const result = await tarFilesystemReadBeforeToolCallHandler(event, CTX);
+    expect(result).toBeUndefined();
+  });
+
+  it("passes through non-read tools without blocking", async () => {
+    const event = {
+      toolName: "bash",
+      params: { command: "echo hi" },
+    };
+    const result = await tarFilesystemReadBeforeToolCallHandler(event, CTX);
+    expect(result).toBeUndefined();
   });
 });

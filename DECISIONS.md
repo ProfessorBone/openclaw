@@ -552,3 +552,111 @@ bypass governance — it is simply a different access mechanism.
 **Rationale:** Vault is Continuum's financial strategy and economic intelligence engine. Three intelligence engines (Economic Regime, Cross-Market, Narrative Intelligence) produce advisory intelligence products across six emission actuators (A1–A6). All A1 strategic recommendations route through the Intelligence Quality Gate before Bridge delivery. Capital segregation between retirement and trading partitions is enforced at the perceptual level via S2. Persistent miscalibration is measured externally by the calibration evaluation pipeline across three P2 surfaces (P2a, P2b, P2c). Vault cannot observe its own analytical drift — that is the structural reason P2 calibration evaluation exists as governed infrastructure outside Vault's sandbox. The Intelligence Quality Gate supersedes the Thesis Documentation Gate from PEAS v1.0.0 with expanded coverage across all four output types. The subagents.allowAgents: [] entry enforces the no-spawning constraint.
 
 **Authority:** Faheem, 2026-03-16.
+
+---
+
+## PENDING RATIONALE — 2026-03-20
+
+**File modified:** continuum/governance/tar-read-enforcement.ts
+**Modified at:** 2026-03-20 20:37:38
+**Governance tier:** Architecture / Constitutional
+**Rationale:** REQUIRED — document the architectural decision that justifies
+this change before this session closes. Uncommitted pending rationale entries
+constitute a System Charter violation (no silent evolution rule).
+**Review required by:** Faheem
+
+---
+
+## PENDING RATIONALE — 2026-03-20
+
+**File modified:** continuum/governance/tar-read-enforcement.ts
+**Modified at:** 2026-03-20 20:37:46
+**Governance tier:** Architecture / Constitutional
+**Rationale:** REQUIRED — document the architectural decision that justifies
+this change before this session closes. Uncommitted pending rationale entries
+constitute a System Charter violation (no silent evolution rule).
+**Review required by:** Faheem
+
+---
+
+## PENDING RATIONALE — 2026-03-20
+
+**File modified:** continuum/governance/tar-read-enforcement.ts
+**Modified at:** 2026-03-20 20:38:17
+**Governance tier:** Architecture / Constitutional
+**Rationale:** REQUIRED — document the architectural decision that justifies
+this change before this session closes. Uncommitted pending rationale entries
+constitute a System Charter violation (no silent evolution rule).
+**Review required by:** Faheem
+
+---
+
+## PENDING RATIONALE — 2026-03-20
+
+**File modified:** continuum/governance/tar-read-enforcement.test.ts
+**Modified at:** 2026-03-20 20:38:58
+**Governance tier:** Architecture / Constitutional
+**Rationale:** REQUIRED — document the architectural decision that justifies
+this change before this session closes. Uncommitted pending rationale entries
+constitute a System Charter violation (no silent evolution rule).
+**Review required by:** Faheem
+
+---
+
+## PENDING RATIONALE — 2026-03-20
+
+**File modified:** continuum/governance/tar-read-enforcement.test.ts
+**Modified at:** 2026-03-20 20:39:41
+**Governance tier:** Architecture / Constitutional
+**Rationale:** REQUIRED — document the architectural decision that justifies
+this change before this session closes. Uncommitted pending rationale entries
+constitute a System Charter violation (no silent evolution rule).
+**Review required by:** Faheem
+
+---
+
+## PENDING RATIONALE — 2026-03-20
+
+**File modified:** continuum/governance/tar-read-enforcement.ts
+**Modified at:** 2026-03-20 20:50:38
+**Governance tier:** Architecture / Constitutional
+**Rationale:** REQUIRED — document the architectural decision that justifies
+this change before this session closes. Uncommitted pending rationale entries
+constitute a System Charter violation (no silent evolution rule).
+**Review required by:** Faheem
+
+---
+
+## PENDING RATIONALE — 2026-03-20
+
+**File modified:** continuum/governance/tar-read-enforcement.ts
+**Modified at:** 2026-03-20 20:53:03
+**Governance tier:** Architecture / Constitutional
+**Rationale:** REQUIRED — document the architectural decision that justifies
+this change before this session closes. Uncommitted pending rationale entries
+constitute a System Charter violation (no silent evolution rule).
+**Review required by:** Faheem
+
+---
+
+## PENDING RATIONALE — 2026-03-20
+
+**File modified:** continuum/governance/tar-read-enforcement.ts
+**Modified at:** 2026-03-20 20:54:15
+**Governance tier:** Architecture / Constitutional
+**Rationale:** REQUIRED — document the architectural decision that justifies
+this change before this session closes. Uncommitted pending rationale entries
+constitute a System Charter violation (no silent evolution rule).
+**Review required by:** Faheem
+
+---
+
+## PENDING RATIONALE — 2026-03-20
+
+**File modified:** continuum/governance/tar-read-enforcement.ts
+**Modified at:** 2026-03-20 20:54:21
+**Governance tier:** Architecture / Constitutional
+**Rationale:** REQUIRED — document the architectural decision that justifies
+this change before this session closes. Uncommitted pending rationale entries
+constitute a System Charter violation (no silent evolution rule).
+**Review required by:** Faheem

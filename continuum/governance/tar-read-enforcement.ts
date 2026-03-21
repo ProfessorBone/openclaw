@@ -210,6 +210,7 @@ export function enforceReadBeforeToolCall(params: {
 const TAR005_OPERATIONS = new Set([
   "mcp__filesystem__read_file",
   "mcp__filesystem__read_text_file",
+  "read", // OpenClaw native read tool (pi-coding-agent)
 ]);
 
 const TAR007_OPERATIONS = new Set([
@@ -219,6 +220,9 @@ const TAR007_OPERATIONS = new Set([
 
 function extractReadPath(event: PluginHookBeforeToolCallEvent): string {
   const p = event.params;
+  if (typeof p["file_path"] === "string") {
+    return p["file_path"];
+  }
   if (typeof p["path"] === "string") {
     return p["path"];
   }
@@ -250,7 +254,8 @@ export async function tarFilesystemReadBeforeToolCallHandler(
     return;
   }
 
-  const operationName = event.toolName.replace("mcp__filesystem__", "");
+  const operationName =
+    event.toolName === "read" ? "read_file" : event.toolName.replace("mcp__filesystem__", "");
   const { agentId, taskId, traceId } = makeReadCtx(ctx);
   const requestedPath = extractReadPath(event);
 
@@ -265,7 +270,8 @@ export async function tarFilesystemReadBeforeToolCallHandler(
 
   log.info(
     `TAR-005 read: capability=${result.record.capability_id} ` +
-      `agent=${agentId} outcome=${result.record.outcome} path=${requestedPath}` +
+      `agent=${agentId} task_id=${taskId} trace_id=${traceId} ` +
+      `outcome=${result.record.outcome} path=${requestedPath}` +
       (result.denialReason ? ` denied=${result.denialReason}` : ""),
   );
 
