@@ -16,6 +16,8 @@
 
 import { createSubsystemLogger } from "../../src/logging/subsystem.js";
 import type { OpenClawPluginApi, OpenClawPluginDefinition } from "../../src/plugins/types.js";
+import { auditLog } from "./audit-log.js";
+import { mecAvailabilityGuard, type ProtectedDecisionClass } from "./mec-fail-closed.js";
 import {
   tarVaultCreateBeforeToolCallHandler,
   tarRepoCreateBeforeToolCallHandler,
@@ -71,3 +73,57 @@ const continuumGovernancePlugin: OpenClawPluginDefinition = {
 };
 
 export default continuumGovernancePlugin;
+
+// ---------------------------------------------------------------------------
+// Protected decision enforcement (INJ-005 / INJ-021 gate)
+// ---------------------------------------------------------------------------
+
+export type ProtectedDecisionResult =
+  | { allowed: true; entry_id: string }
+  | { allowed: false; reason: string };
+
+/**
+ * Gate for all protected Bridge decisions (SUMMARY_EMISSION, MEMORY_COMMIT_AUTH,
+ * ESCALATION_DECISION).
+ *
+ * Enforces in order:
+ *   1. MEC availability check (mecAvailabilityGuard) — fires FAIL_CLOSED_TRIGGERED
+ *   2. Audit log write (auditLog) — blocked + returns false when log is frozen
+ *
+ * A protected decision may not proceed unless both checks pass.
+ * Per PACS-ARCH-AUDIT-001 Section 5 and PACS-VALIDATION-001 INJ-005/INJ-021.
+ */
+export function enforceProtectedDecision(params: {
+  agentId: string;
+  decisionClass: ProtectedDecisionClass;
+  decisionId: string;
+  payload: Record<string, unknown>;
+}): ProtectedDecisionResult {
+  // 1. MEC availability gate
+  const mecResult = mecAvailabilityGuard.checkDecision(params.decisionClass);
+  if (!mecResult.allowed) {
+    log.info(
+      `Protected decision blocked — MEC unavailable: ` +
+        `class=${params.decisionClass} agent=${params.agentId}`,
+    );
+    return { allowed: false, reason: mecResult.reason };
+  }
+
+  // 2. Audit log write gate
+  const writeResult = auditLog.write({
+    producer_agent: params.agentId,
+    decision_id: params.decisionId,
+    decision_class: params.decisionClass,
+    payload: params.payload,
+  });
+
+  if (!writeResult.write_confirmed) {
+    log.error(
+      `Protected decision blocked — audit log frozen: ` +
+        `class=${params.decisionClass} agent=${params.agentId}`,
+    );
+    return { allowed: false, reason: writeResult.reason };
+  }
+
+  return { allowed: true, entry_id: writeResult.entry_id };
+}

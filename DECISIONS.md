@@ -660,3 +660,51 @@ constitute a System Charter violation (no silent evolution rule).
 this change before this session closes. Uncommitted pending rationale entries
 constitute a System Charter violation (no silent evolution rule).
 **Review required by:** Faheem
+
+---
+
+## PENDING RATIONALE — 2026-03-20
+
+**File modified:** continuum/governance/tar-hook.ts
+**Modified at:** 2026-03-20 21:12:53
+**Governance tier:** Architecture / Constitutional
+**Rationale:** REQUIRED — document the architectural decision that justifies
+this change before this session closes. Uncommitted pending rationale entries
+constitute a System Charter violation (no silent evolution rule).
+**Review required by:** Faheem
+
+---
+
+## PENDING RATIONALE — 2026-03-20
+
+**File modified:** continuum/governance/tar-hook.ts
+**Modified at:** 2026-03-20 21:13:07
+**Governance tier:** Architecture / Constitutional
+**Rationale:** REQUIRED — document the architectural decision that justifies
+this change before this session closes. Uncommitted pending rationale entries
+constitute a System Charter violation (no silent evolution rule).
+**Review required by:** Faheem
+
+---
+
+## PENDING RATIONALE — 2026-03-20
+
+**File modified:** continuum/governance/continuum-governance-plugin.ts
+**Modified at:** 2026-03-20 21:13:14
+**Governance tier:** Architecture / Constitutional
+**Rationale:** REQUIRED — document the architectural decision that justifies
+this change before this session closes. Uncommitted pending rationale entries
+constitute a System Charter violation (no silent evolution rule).
+**Review required by:** Faheem
+
+---
+
+## PENDING RATIONALE — 2026-03-20
+
+**File modified:** continuum/governance/continuum-governance-plugin.ts
+**Modified at:** 2026-03-20 21:13:25
+**Governance tier:** Architecture / Constitutional
+**Rationale:** REQUIRED — document the architectural decision that justifies
+this change before this session closes. Uncommitted pending rationale entries
+constitute a System Charter violation (no silent evolution rule).
+**Review required by:** Faheem

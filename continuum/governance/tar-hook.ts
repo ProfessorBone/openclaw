@@ -25,6 +25,7 @@ import type {
   PluginHookBeforeToolCallResult,
   PluginHookToolContext,
 } from "../../src/plugins/types.js";
+import { auditLog } from "./audit-log.js";
 import { enforceBeforeToolCall, type InvocationRecord } from "./tar-enforcement.js";
 
 const log = createSubsystemLogger("continuum/tar");
@@ -80,6 +81,19 @@ function emitInvocationRecord(record: InvocationRecord): void {
       `outcome=${record.outcome} op=${record.operation_name}` +
       (record.denial_reason ? ` denied=${record.denial_reason}` : ""),
   );
+
+  // Wire routing decisions to the audit chain.
+  auditLog.write({
+    producer_agent: record.agent_id,
+    decision_id: record.task_id,
+    decision_class: "routing",
+    payload: {
+      capability_id: record.capability_id,
+      operation_name: record.operation_name,
+      outcome: record.outcome,
+      ...(record.denial_reason ? { denial_reason: record.denial_reason } : {}),
+    },
+  });
 }
 
 // ---------------------------------------------------------------------------
