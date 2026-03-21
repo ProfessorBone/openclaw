@@ -555,156 +555,163 @@ bypass governance — it is simply a different access mechanism.
 
 ---
 
-## PENDING RATIONALE — 2026-03-20
+## ADR-029 — Native Read Tool Added to TAR-005 Enforcement Coverage
 
-**File modified:** continuum/governance/tar-read-enforcement.ts
-**Modified at:** 2026-03-20 20:37:38
-**Governance tier:** Architecture / Constitutional
-**Rationale:** REQUIRED — document the architectural decision that justifies
-this change before this session closes. Uncommitted pending rationale entries
-constitute a System Charter violation (no silent evolution rule).
-**Review required by:** Faheem
+**Date:** 2026-03-20
+**Files:** `continuum/governance/tar-read-enforcement.ts`
+**Commit:** `49cc34ead` (Work Order 6D)
+**PENDING entries resolved:** tar-read-enforcement.ts 20:37:38, 20:37:46, 20:38:17
 
----
+**What changed:**
 
-## PENDING RATIONALE — 2026-03-20
+- `TAR005_OPERATIONS` Set: added `"read"` alongside `"mcp__filesystem__read_file"` and `"mcp__filesystem__read_text_file"`
+- `extractReadPath()`: added `"file_path"` as a recognized parameter name (alongside `"path"`, `"target"`, `"directory"`)
+- `tarFilesystemReadBeforeToolCallHandler()`: added identity mapping so `operationName = "read_file"` when incoming tool name is `"read"`, normalizing to the TAR capability row name before enforcement runs
 
-**File modified:** continuum/governance/tar-read-enforcement.ts
-**Modified at:** 2026-03-20 20:37:46
-**Governance tier:** Architecture / Constitutional
-**Rationale:** REQUIRED — document the architectural decision that justifies
-this change before this session closes. Uncommitted pending rationale entries
-constitute a System Charter violation (no silent evolution rule).
-**Review required by:** Faheem
+**Why smallest safe patch:**
+TAR-005 previously covered only MCP-prefixed read operations. OpenClaw's native `read` tool bypassed TAR-005 enforcement entirely — a structural capability gap. The patch extended the existing `tarFilesystemReadBeforeToolCallHandler` function; no new enforcement path was created. The `operationName` identity mapping is a one-line normalization that keeps TAR lookup logic and all four enforcement steps (capability resolution → agent auth → scope → vault-fallback prohibition) unchanged.
 
----
+**Alternative rejected:**
+Creating a separate `tarNativeReadHandler()` was considered. Rejected because two enforcement paths for the same TAR-005 row create divergence risk. The TAR entry covers `read_file` capability regardless of whether the call arrives via MCP or native tool. One handler, one lookup, one enforcement surface is the correct architectural pattern per PACS-ARCH-TAR-001.
 
-## PENDING RATIONALE — 2026-03-20
+**Architectural trace:**
 
-**File modified:** continuum/governance/tar-read-enforcement.ts
-**Modified at:** 2026-03-20 20:38:17
-**Governance tier:** Architecture / Constitutional
-**Rationale:** REQUIRED — document the architectural decision that justifies
-this change before this session closes. Uncommitted pending rationale entries
-constitute a System Charter violation (no silent evolution rule).
-**Review required by:** Faheem
+- PACS-ARCH-TAR-001: TAR-005 `read_file` capability row, authorized agents the-bridge and foundry, path scoped to authorized filesystem envelope; capability surface must be fully enumerated
+- PACS-IMPL-STAGE3-001 Work Order 4: TAR-005 and TAR-007 enforcement surfaces
+- ARCH-ADR-003: capability allowlist architecture — all tool access must resolve through TAR before execution; unregistered paths are containment failures
+- ADR-028 (DECISIONS.md): Vault sandbox enforcement establishes that runtime tool denials implement Charter Section 9 non-negotiables — TAR-005 scope enforcement is the governance-layer complement
 
 ---
 
-## PENDING RATIONALE — 2026-03-20
+## ADR-030 — Auditability Hardening: task_id/trace_id in Filesystem Read Log + Test Coverage
 
-**File modified:** continuum/governance/tar-read-enforcement.test.ts
-**Modified at:** 2026-03-20 20:38:58
-**Governance tier:** Architecture / Constitutional
-**Rationale:** REQUIRED — document the architectural decision that justifies
-this change before this session closes. Uncommitted pending rationale entries
-constitute a System Charter violation (no silent evolution rule).
-**Review required by:** Faheem
+**Date:** 2026-03-20
+**Files:** `continuum/governance/tar-read-enforcement.ts`, `continuum/governance/tar-read-enforcement.test.ts`
+**Commit:** `49cc34ead` (Work Order 6D)
+**PENDING entries resolved:** tar-read-enforcement.test.ts 20:38:58, 20:39:41; tar-read-enforcement.ts 20:50:38, 20:53:03, 20:54:15, 20:54:21
 
----
+**What changed:**
 
-## PENDING RATIONALE — 2026-03-20
+- `tar-read-enforcement.ts` — `tarFilesystemReadBeforeToolCallHandler()`: log output now includes `task_id` and `trace_id` extracted from hook context (`ctx.runId`, `ctx.sessionId`/`ctx.sessionKey`), defaulting to `"no-task-id"` / `"no-trace-id"` when absent
+- `tar-read-enforcement.test.ts`: added 3 tests covering (a) scope violation blocked for native `read`, (b) in-scope native `read` passes, (c) non-read tool passes through without enforcement
 
-**File modified:** continuum/governance/tar-read-enforcement.test.ts
-**Modified at:** 2026-03-20 20:39:41
-**Governance tier:** Architecture / Constitutional
-**Rationale:** REQUIRED — document the architectural decision that justifies
-this change before this session closes. Uncommitted pending rationale entries
-constitute a System Charter violation (no silent evolution rule).
-**Review required by:** Faheem
+**Why smallest safe patch:**
+The log statement already existed; the correlation fields were already present in the hook context type. Adding `task_id`/`trace_id` requires no interface change. The three tests target exactly the new branch (`TAR005_OPERATIONS.has("read")`) introduced in ADR-029; no existing test path was modified.
 
----
+**Important scope clarification — audit chain vs. subsystem log:**
+`tarFilesystemReadBeforeToolCallHandler()` writes enforcement decisions (both passes and blocks, for both MCP filesystem reads and native `read`) to the subsystem log via `log.info()`. This handler does not call `auditLog.write()` directly. MCP filesystem read calls also pass through `tarBeforeToolCallHandler` in `tar-hook.ts`, which calls `emitInvocationRecord()` and therefore produces an audit chain entry — see ADR-031. Native `read` tool calls do not pass through `tarBeforeToolCallHandler` (that handler returns early for non-MCP tools via `parseMcpToolName`), so native `read` enforcement decisions are written to the subsystem log only and do not produce audit chain entries at this stage.
 
-## PENDING RATIONALE — 2026-03-20
+**Alternative rejected:**
+Adding `auditLog.write()` inside `tarFilesystemReadBeforeToolCallHandler()` for every TAR-005 decision was considered. Rejected for two reasons: (1) MCP filesystem reads would then produce duplicate audit entries — one from this handler and one from `emitInvocationRecord()` in `tarBeforeToolCallHandler`; (2) native `read` passes are high-frequency and the audit chain is designed for governance events. If native `read` audit coverage is later required, the correct path is wiring `emitInvocationRecord()` into `tarFilesystemReadBeforeToolCallHandler` once the duplication issue for MCP reads is resolved.
 
-**File modified:** continuum/governance/tar-read-enforcement.ts
-**Modified at:** 2026-03-20 20:50:38
-**Governance tier:** Architecture / Constitutional
-**Rationale:** REQUIRED — document the architectural decision that justifies
-this change before this session closes. Uncommitted pending rationale entries
-constitute a System Charter violation (no silent evolution rule).
-**Review required by:** Faheem
+**Architectural trace:**
+
+- PACS-ARCH-TAR-001: enforcement decisions must carry correlation identifiers (task_id, trace_id) at all governance surfaces
+- PACS-IMPL-STAGE3-001: test coverage requirement — every new enforcement branch must have a corresponding positive and negative test
+- PACS-ARCH-ACM-001: agent context model defining taskId (runId) and traceId (sessionId/sessionKey) as the canonical correlation fields
 
 ---
 
-## PENDING RATIONALE — 2026-03-20
+## ADR-031 — Fail-Closed Governance Wiring: MEC Guard + Audit Log in enforceProtectedDecision; Audit Chain for MCP Tool Invocations
 
-**File modified:** continuum/governance/tar-read-enforcement.ts
-**Modified at:** 2026-03-20 20:53:03
-**Governance tier:** Architecture / Constitutional
-**Rationale:** REQUIRED — document the architectural decision that justifies
-this change before this session closes. Uncommitted pending rationale entries
-constitute a System Charter violation (no silent evolution rule).
-**Review required by:** Faheem
+**Date:** 2026-03-20
+**Files:** `continuum/governance/tar-hook.ts`, `continuum/governance/continuum-governance-plugin.ts`
+**Commit:** `85f3fa51a` (INJ-005/INJ-021 pass)
+**PENDING entries resolved:** tar-hook.ts 21:12:53, 21:13:07; continuum-governance-plugin.ts 21:13:14, 21:13:25
 
----
+**What changed:**
 
-## PENDING RATIONALE — 2026-03-20
+- `tar-hook.ts` — `emitInvocationRecord()`: added `auditLog.write()` call, writing `decision_class: "routing"` for every TAR invocation record produced by `tarBeforeToolCallHandler`. Called for both allowed and denied MCP tool calls; the audit entry captures capability_id, operation_name, outcome, and denial_reason when present.
+- `continuum-governance-plugin.ts` — added `enforceProtectedDecision()`: sequences MEC availability check (`mecAvailabilityGuard.checkDecision()`) → audit log write (`auditLog.write()`). Returns `{allowed: true, entry_id}` or `{allowed: false, reason}`. Called before any SUMMARY_EMISSION, MEMORY_COMMIT_AUTH, or ESCALATION_DECISION class decision.
 
-**File modified:** continuum/governance/tar-read-enforcement.ts
-**Modified at:** 2026-03-20 20:54:15
-**Governance tier:** Architecture / Constitutional
-**Rationale:** REQUIRED — document the architectural decision that justifies
-this change before this session closes. Uncommitted pending rationale entries
-constitute a System Charter violation (no silent evolution rule).
-**Review required by:** Faheem
+**Important scope clarification — what `emitInvocationRecord()` covers:**
+`emitInvocationRecord()` is called exclusively from `tarBeforeToolCallHandler`. That handler begins with `if (!parsed.isMcp) { return; }` — it returns immediately for non-MCP tool names. `parseMcpToolName("read")` returns `{isMcp: false}`, so native `read` tool calls skip `tarBeforeToolCallHandler` entirely and do not produce audit chain entries through this path. The `auditLog.write()` in `emitInvocationRecord()` therefore covers MCP tool invocation records only. (See ADR-030 for the separate treatment of native `read` enforcement logging.)
 
----
+**Why smallest safe patch:**
+INJ-005 (Audit Chain Integrity) and INJ-021 (MEC Fail-Closed) required that the enforcement path be tamper-evidenced and MEC-gated respectively. The two operations were composed in sequence inside a single new function rather than scattered across call sites. `emitInvocationRecord()` received the audit write because it is the single choke point for all MCP TAR decisions — no new call sites needed, and all future MCP tool registrations automatically inherit the audit write.
 
-## PENDING RATIONALE — 2026-03-20
+**Alternative rejected:**
+Wiring audit writes directly at each TAR handler call site was considered. Rejected because it duplicates the write path across N handlers and creates a gap whenever a new handler is added. Centralizing in `emitInvocationRecord()` means the audit write is structurally guaranteed for all current and future MCP TAR paths.
 
-**File modified:** continuum/governance/tar-read-enforcement.ts
-**Modified at:** 2026-03-20 20:54:21
-**Governance tier:** Architecture / Constitutional
-**Rationale:** REQUIRED — document the architectural decision that justifies
-this change before this session closes. Uncommitted pending rationale entries
-constitute a System Charter violation (no silent evolution rule).
-**Review required by:** Faheem
+**Architectural trace:**
+
+- PACS-IMPL-STAGE3-001 INJ-005 (Audit Chain Integrity): MCP tool invocation records must be written to the tamper-evident audit chain; enforcement cannot be observability-only
+- PACS-IMPL-STAGE3-001 INJ-021 (MEC Fail-Closed): MEC unavailability must block protected decision classes (SUMMARY_EMISSION, MEMORY_COMMIT_AUTH, ESCALATION_DECISION), not degrade silently
+- ADR-003 (DECISIONS.md): hook-based governance enforcement is the deterministic constraint layer; `enforceProtectedDecision()` is the hook-layer implementation of the MEC gate for protected decisions
+- ARCH-ADR-003 and PACS-IMPL-STAGE3-001: protected decision execution is fail-closed and audit-visible; enforceProtectedDecision() is the runtime implementation point
 
 ---
 
-## PENDING RATIONALE — 2026-03-20
+## ADR-032 — Runtime Scope Correction: group:plugins Narrowed to Named MCP Servers
 
-**File modified:** continuum/governance/tar-hook.ts
-**Modified at:** 2026-03-20 21:12:53
-**Governance tier:** Architecture / Constitutional
-**Rationale:** REQUIRED — document the architectural decision that justifies
-this change before this session closes. Uncommitted pending rationale entries
-constitute a System Charter violation (no silent evolution rule).
-**Review required by:** Faheem
+**Date:** 2026-03-20
+**Files:** `~/.openclaw/openclaw.json` (system configuration, outside repo)
+**Commit:** `239618c28` (STATE.md reflects resolution; openclaw.json is not version-controlled)
+**PENDING entries resolved:** (no DECISIONS.md stub — ADR documents the change retroactively)
 
----
+**What changed:**
+The Bridge agent tools.alsoAllow field in openclaw.json was changed from `["group:plugins"]` to `["mcp__obsidian-vault", "mcp__filesystem"]`. `group:plugins` is a breadth selector that would authorize any plugin registered at runtime, including future plugins not yet enumerated in the TAR. The two named values correspond exactly to the two MCP servers with active TAR rows: obsidian-vault (TAR-001 through TAR-004) and filesystem (TAR-005 through TAR-008).
 
-## PENDING RATIONALE — 2026-03-20
+**Why smallest safe patch:**
+The change is a one-field substitution in openclaw.json. No TAR entries were modified. No enforcement logic was changed. The two named servers are the only MCP servers with TAR coverage; the substitution makes the `alsoAllow` list structurally congruent with the TAR's actual enumeration across all eight active rows.
 
-**File modified:** continuum/governance/tar-hook.ts
-**Modified at:** 2026-03-20 21:13:07
-**Governance tier:** Architecture / Constitutional
-**Rationale:** REQUIRED — document the architectural decision that justifies
-this change before this session closes. Uncommitted pending rationale entries
-constitute a System Charter violation (no silent evolution rule).
-**Review required by:** Faheem
+**Alternative rejected:**
+Keeping `group:plugins` and relying on TAR enforcement to block non-enumerated servers was considered. Rejected because TAR is an allowlist architecture — unknown tools are blocked by absence of a TAR entry. However, `group:plugins` as a runtime selector means any newly registered plugin is admitted to the tool surface before a TAR row can be created for it. That window violates the enumeration requirement: the capability surface must be fully declared before any session that could invoke it. Named server entries eliminate the window entirely.
 
----
+**Architectural trace:**
 
-## PENDING RATIONALE — 2026-03-20
-
-**File modified:** continuum/governance/continuum-governance-plugin.ts
-**Modified at:** 2026-03-20 21:13:14
-**Governance tier:** Architecture / Constitutional
-**Rationale:** REQUIRED — document the architectural decision that justifies
-this change before this session closes. Uncommitted pending rationale entries
-constitute a System Charter violation (no silent evolution rule).
-**Review required by:** Faheem
+- PACS-ARCH-TAR-001: capability surface must be fully enumerated; wildcard selectors that exceed the active TAR enumeration are containment failures; obsidian-vault covers TAR-001 through TAR-004, filesystem covers TAR-005 through TAR-008
+- ADR-028 (DECISIONS.md): Vault registration establishes the tools.deny list at the openclaw.json agent entry level — the `alsoAllow` correction applies the same principle of explicit enumeration at the plugin scope level
+- ARCH-ADR-003: capability allowlist architecture — known-enumerated tools only, fail-closed on unknowns
+- System Charter Section 4 (agent capability boundaries are fixed at configuration time, not dynamically expanded): `group:plugins` violates this by making the capability boundary dynamic
 
 ---
 
-## PENDING RATIONALE — 2026-03-20
+## ADR-033 — Level 1 Constitutional Boundary Detection Modules Added for Round 2 Validation
 
-**File modified:** continuum/governance/continuum-governance-plugin.ts
-**Modified at:** 2026-03-20 21:13:25
-**Governance tier:** Architecture / Constitutional
-**Rationale:** REQUIRED — document the architectural decision that justifies
-this change before this session closes. Uncommitted pending rationale entries
-constitute a System Charter violation (no silent evolution rule).
-**Review required by:** Faheem
+**Date:** 2026-03-21
+**Files:**
+
+- `continuum/governance/vlt-002-gate-bypass.ts`
+- `continuum/governance/mec-006-bypass-detection.ts`
+- `continuum/governance/vlt-006-segregation.ts`
+- `continuum/governance/g-002-deny-list.ts`
+- `continuum/governance/mec-004-reconciliation-authority.ts`
+
+**Commit:** `85f3fa51a` (Stage 3 Round 2 — INJ-001 INJ-002 INJ-003 INJ-004 INJ-023 all pass)
+**PENDING entries resolved:** vlt-002-gate-bypass.ts 10:55:55, mec-006-bypass-detection.ts 10:56:36, vlt-006-segregation.ts 10:56:55, g-002-deny-list.ts 10:57:20, mec-004-reconciliation-authority.ts 10:57:35
+
+**What changed:**
+Five focused detection modules were added, one per Level 1 constitutional boundary rule validated in PACS-VALIDATION-001 Round 2:
+
+- `vlt-002-gate-bypass.ts` — `Vlt002GateBypassDetector`: detects STRATEGIC_RECOMMENDATION_EMITTED events lacking a `gate_validation_event_id`. Emits RULE_VIOLATION_ALERT_EMITTED (rule_id: VLT-002, producer: Vault) and halts the affected pathway. Implements the Intelligence Quality Gate bypass surface (INJ-001).
+
+- `mec-006-bypass-detection.ts` — `Mec006BypassDetector`: detects protected decision execution (SUMMARY_EMISSION, MEMORY_COMMIT_AUTH, ESCALATION_DECISION) with no paired ADJUDICATION_COMPLETED (outcome=approved) in the adjudication registry. Emits GOVERNANCE_ESCALATION_EMITTED (rule_id: MEC-006, bypass_bridge: true) and writes to the tamper-evident audit chain. Implements MEC governance bypass detection (INJ-002).
+
+- `vlt-006-segregation.ts` — `Vlt006SegregationDetector`: detects PORTFOLIO_ANALYSIS_EMITTED events that reference both the retirement and trading partitions simultaneously without a CROSS_PARTITION_AUTHORIZATION_GRANTED event. Emits RULE_VIOLATION_ALERT_EMITTED (rule_id: VLT-006, producer: Vault) and halts the analysis cycle. Implements capital segregation enforcement (INJ-003).
+
+- `g-002-deny-list.ts` — `G002DenyListDetector`: checks attempted actions against VAULT_DENY_LIST (exec, process, browser, canvas, gateway, nodes from ADR-028; margin_trading, autonomous_capital_deployment, direct_brokerage_execution, external_financial_write from Charter Section 9). On match, emits GOVERNANCE_ESCALATION_EMITTED (rule_id: G-002, bypass_bridge: true, execution_occurred: false) and writes to the tamper-evident audit chain. The action is structurally blocked with no execution pathway. Implements deny list breach detection (INJ-004).
+
+- `mec-004-reconciliation-authority.ts` — `Mec004ReconciliationAuthorityDetector`: detects Bridge configuration modification events lacking a `faheem_authorization_record_id`. Emits GOVERNANCE_ESCALATION_EMITTED (rule_id: MEC-004, bypass_bridge: true, modification_blocked: true). Implements governance directionality enforcement for external service configuration push attempts (INJ-023).
+
+**Why grouped as a single ADR:**
+All five modules belong to Round 2 Level 1 containment validation. They were authored together as a single architectural deliverable — the detection surface layer required before PACS-VALIDATION-001 Round 2 injections could execute. They are a single coherent concern: extending the governance detection surface to cover the five constitutional boundaries that Round 2 tests. Splitting them across five ADRs would fragment the decision record without adding clarity.
+
+**Why smallest safe patch:**
+One detector class per rule, no generalized speculative detection framework. Each class exposes exactly the interface its corresponding test requires: a single `check*()` method, `_resetForTesting()`, and a singleton export. No logic is shared across detectors because the five rules operate on different event types, different payload shapes, and different escalation pathways (two emit RULE_VIOLATION_ALERT_EMITTED via Vault; three emit GOVERNANCE_ESCALATION_EMITTED via the MEC/Vault with bypass_bridge: true). Factoring a common base class would couple unrelated governance surfaces and obscure the per-rule constitutional trace.
+
+**Alternative rejected:**
+Two alternatives were considered and rejected:
+
+1. _Monolithic detector_ — a single class handling all five rules. Rejected because the five rules have no shared state, no shared event types, and no shared escalation pathway. A monolithic class would be harder to test in isolation (each injection test must reset only its detector, not a shared instance) and would make the per-rule constitutional trace unreadable.
+
+2. _Embedding detection logic in `continuum-governance-plugin.ts`_ — adding inline `if` checks inside the plugin's hook handlers. Rejected because the plugin is a Layer 2 orchestration artifact (enforcement wiring and hook registration). Detection logic belongs in named, testable Layer 2/3 governance modules with their own decision records. Embedding it in the plugin would conflate the detection surface with the enforcement wiring surface, making both harder to test and evolve independently.
+
+**Architectural trace:**
+
+- PACS-VALIDATION-001 Round 2 — INJ-001 (VLT-002 gate bypass), INJ-002 (MEC-006 governance bypass), INJ-003 (VLT-006 capital segregation), INJ-004 (G-002/VLT-007 deny list breach), INJ-023 (MEC-004 reconciliation authority): each module is the detection surface required for its corresponding injection test
+- ARCH-ADR-003: capability allowlist and containment architecture — Level 1 failures are constitutional, not configurable; no authorization pathway exists for deny-listed actions or governance directionality violations
+- ARCH-ADR-001 and ARCH-ADR-003: authority directionality and fail-closed enforcement — MEC-006 and MEC-004 detectors enforce that protected decisions and Bridge configuration changes require the correct upstream authorization path
+- System Charter Section 6 (Financial Governance Principles): VLT-002 (strategic recommendations must pass the Intelligence Quality Gate) and VLT-006 (retirement and trading partitions must remain structurally separated at the perceptual level)
+- System Charter Section 9 (Non-Negotiables): G-002 deny list includes all nine Charter Section 9 items; execution_occurred: false is a structural guarantee, not a logged assertion
+- System Charter Section 3 (governance directionality): MEC-004 enforces the principle that configuration authority flows from Faheem through The Bridge; external services may not push configuration without an explicit Faheem authorization record
