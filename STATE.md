@@ -14,8 +14,8 @@
 
 ## Current Phase
 
-Phase 2 — Implementation (Stage 3: Failure Injection Execution)
-current_phase: Stage 3 Round 2 complete
+Phase 2 — Implementation (Stage 5: Production Onboarding)
+current_phase: Stage 4 COMPLETE — awaiting Faheem authorization to begin Stage 5
 
 Phase 1 (Blueprint & Documentation) is COMPLETE. All Phase 1 artifacts are
 locked in the Obsidian vault at Projects/Faheem's PAC System/.
@@ -24,10 +24,15 @@ Stage 1 exit gate: PASSED (INJ-005, INJ-021 — commit 85f3fa51a)
 Stage 2: COMPLETE (all 8 agents scaffolded — ADR-021 through ADR-028)
 Stage 3 Round 1: COMPLETE (INJ-005, INJ-021)
 Stage 3 Round 2: COMPLETE (INJ-001, INJ-002, INJ-003, INJ-004, INJ-023 — commit bc86fd59e)
+Stage 3 Round 3: COMPLETE (INJ-006 through INJ-012, INJ-019, INJ-020 — commit 3044eec9f)
+Stage 3 Round 4: COMPLETE (INJ-015, INJ-016, INJ-017, INJ-018, INJ-022 — commit dfa12bf83)
+Stage 3: COMPLETE — all 4 rounds, 219 tests passing
+Pre-Stage 4 prep: COMPLETE — Bridge SOUL.md v1.1.0, TAR-009 activated, ADR-036 written (commit 3a3061d5d)
+Stage 4: COMPLETE — all 6 workloads passed, coverage_rate=1.0, Stage 4 coverage gate PASSED (2026-03-21)
 
-last_action: Stage 3 Round 2 complete — INJ-001 INJ-002 INJ-003 INJ-004 INJ-023 all pass. 184 tests passing.
-next_action: Stage 3 Round 3 — governance processes (INJ-006 through INJ-014, INJ-020). DECISIONS.md PENDING RATIONALE entries must be resolved before Round 3 begins.
-last_updated: 2026-03-21
+last_action: Stage 4 COMPLETE. WL5 Vault (A3 emit_market_report, IQG fired, A6 silent, P3 compliant, cycle_id=8e6e5041). WL6 Gauge confirmed coverage_rate=1.0 (5/5 workloads), stage_4_coverage_gate=PASSED. DECISIONS.md 0 PENDING RATIONALE.
+next_action: Await Faheem authorization before beginning Stage 5 (Production Onboarding). Do not push until authorized.
+last_updated: 2026-03-21 14:34:56
 
 ---
 
@@ -56,13 +61,13 @@ proceeding to Stage 2.
 
 ## Phase 2 Stage Tracker
 
-| Stage   | Name                        | Status      |
-| ------- | --------------------------- | ----------- |
-| Stage 1 | Infrastructure Foundation   | IN PROGRESS |
-| Stage 2 | Agent Scaffolding           | PENDING     |
-| Stage 3 | Failure Injection Execution | PENDING     |
-| Stage 4 | Operational Validation      | PENDING     |
-| Stage 5 | Production Onboarding       | PENDING     |
+| Stage   | Name                        | Status   |
+| ------- | --------------------------- | -------- |
+| Stage 1 | Infrastructure Foundation   | COMPLETE |
+| Stage 2 | Agent Scaffolding           | COMPLETE |
+| Stage 3 | Failure Injection Execution | COMPLETE |
+| Stage 4 | Operational Validation      | COMPLETE |
+| Stage 5 | Production Onboarding       | PENDING  |
 
 ---
 
@@ -90,6 +95,29 @@ proceeding to Stage 2.
 | GAP-002: CONFLICT_DETECTED             | INJ-014 injection test           | Add to Foundry-Event-Model.md                                                     |
 | GAP-003: ITEM_FILTERED                 | Signal harness full execution    | Add to Signal-Event-Model.md                                                      |
 | GAP-004/005: Cross-agent stream access | Bridge + Locus harness execution | Confirm in Telemetry.md                                                           |
+
+---
+
+## Stage 4 Vault Docker Note
+
+Vault `sandbox.mode: "all"` requires Docker Desktop to be running. Stage 4 Workload 5
+(Vault analytical cycle) returns `UNAVAILABLE` when Docker is not running.
+Vault's sandbox.mode is NOT being changed — the constraint is intentional governance.
+**Faheem will start Docker Desktop manually before Workload 5 is submitted.**
+Do not submit Vault workload until Docker is confirmed running.
+
+---
+
+## Stage 4 Model Fix (2026-03-21)
+
+`openai/gpt-5.4-mini` failed to resolve in Stage 4 live execution. Gauge, Signal,
+and Locus fell back to `anthropic/claude-opus-4-6` with bootstrap behavior. All
+three agents updated to `openai/gpt-5.4` in ~/.openclaw/openclaw.json. Locus
+updated proactively to prevent drift even though it is not in the Stage 4 set.
+
+**Note:** Correct mini model string needs investigation before production. When a
+valid OpenAI mini-tier model identifier is confirmed, these three agents should be
+updated to use it per DL-024 tiering intent.
 
 ---
 
@@ -137,6 +165,45 @@ Authorization condition: 4 clean paper portfolio cycles + Faheem explicit re-aut
 ---
 
 ## Recent Activity
+
+- 2026-03-21 14:34:56 | Edit | continuum/test/stage4-wl1-wl4-rerun.ts
+- 2026-03-21 14:34:56 | Edit | continuum/test/stage4-wl5-vault-wl6-gauge.ts
+- 2026-03-21 14:34:27 | Edit | continuum/test/stage4-operational-validation.ts
+- 2026-03-21 14:34:22 | Edit | continuum/test/stage4-operational-validation.ts
+- 2026-03-21 14:34:16 | Edit | continuum/test/stage4-wl1-wl4-rerun.ts
+- 2026-03-21 14:34:15 | Edit | continuum/test/stage4-wl5-vault-wl6-gauge.ts
+- 2026-03-21 14:34:12 | Edit | continuum/test/stage4-wl1-wl4-rerun.ts
+- 2026-03-21 14:34:10 | Edit | continuum/test/stage4-wl5-vault-wl6-gauge.ts
+- 2026-03-21 14:26:08 | Write | continuum/test/stage4-wl5-vault-wl6-gauge.ts
+- 2026-03-21 14:11:57 | Write | continuum/test/stage4-wl1-wl4-rerun.ts
+- 2026-03-21 13:43:12 | Write | continuum/test/stage4-operational-validation.ts
+- 2026-03-21 13:24:43 | Edit | DECISIONS.md
+- 2026-03-21 13:18:57 | Write | continuum/governance/tar-web-retrieval-enforcement.test.ts
+- 2026-03-21 13:18:38 | Edit | continuum/governance/continuum-governance-plugin.ts
+- 2026-03-21 13:18:32 | Edit | continuum/governance/continuum-governance-plugin.ts
+- 2026-03-21 13:18:28 | Edit | continuum/governance/continuum-governance-plugin.ts
+- 2026-03-21 13:18:24 | Write | continuum/governance/tar-web-retrieval-enforcement.ts
+- 2026-03-21 13:18:08 | Edit | continuum/governance/tar-enforcement.ts
+- 2026-03-21 12:48:29 | Edit | DECISIONS.md
+- 2026-03-21 12:43:02 | Write | continuum/test/inj-015-016-017-018-022.test.ts
+- 2026-03-21 12:42:07 | Write | continuum/governance/gau-009-self-evaluation.ts
+- 2026-03-21 12:41:48 | Write | continuum/governance/cru-003-premature-advancement.ts
+- 2026-03-21 12:41:32 | Write | continuum/governance/vlt-009-risk-coverage.ts
+- 2026-03-21 12:41:16 | Write | continuum/governance/gau-003-stale-forecast.ts
+- 2026-03-21 12:40:53 | Write | continuum/governance/vlt-010-persistent-miscalibration.ts
+- 2026-03-21 12:29:46 | Edit | DECISIONS.md
+- 2026-03-21 12:07:54 | Edit | continuum/governance/gau-002-formula-drift.ts
+- 2026-03-21 12:05:14 | Write | continuum/test/inj-006-007-008-009-010-011-012-019-020.test.ts
+- 2026-03-21 12:03:21 | Write | continuum/governance/loc-001-graph-auth.ts
+- 2026-03-21 12:03:06 | Write | continuum/governance/sig-005-deposit-pathway.ts
+- 2026-03-21 12:02:52 | Write | continuum/governance/cru-002-reflection-evidence.ts
+- 2026-03-21 12:00:30 | Write | continuum/governance/gau-001-coverage-gap.ts
+- 2026-03-21 12:00:11 | Write | continuum/governance/gau-002-formula-drift.ts
+- 2026-03-21 11:59:52 | Write | continuum/governance/gau-006-suppressed-anomaly.ts
+- 2026-03-21 11:59:33 | Write | continuum/governance/brdg-007-mec-003-memory-auth.ts
+- 2026-03-21 11:59:12 | Write | continuum/governance/brdg-002-untraced-routing.ts
+- 2026-03-21 11:58:57 | Write | continuum/governance/brdg-004-silent-violation.ts
+- 2026-03-21 11:28:08 | Edit | DECISIONS.md
 
 - 2026-03-21 10:59:02 | Write | continuum/test/inj-001-002-003-004-023.test.ts
 - 2026-03-21 10:57:35 | Write | continuum/governance/mec-004-reconciliation-authority.ts
