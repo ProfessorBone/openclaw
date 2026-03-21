@@ -767,3 +767,44 @@ Two alternatives were considered and rejected:
 - ARCH-ADR-003 and PACS-VALIDATION-001: Level 2 process failures escalate through the normal governance path (bridge_notified) rather than direct bypass, unless a higher-level constitutional breach is separately detected.
 - System Charter Section 3 (governance directionality): BRDG-002 and BRDG-007/MEC-003 enforce that routing decisions and memory writes must trace to authorized Bridge adjudication records; untraced execution is a process failure regardless of outcome
 - System Charter Section 4 (observability requirements): GAU-001 and GAU-006 enforce that active agents must produce telemetry and that threshold crossings must surface as anomaly alerts; suppression or silence in the reporting cycle is a governance process failure
+
+---
+
+## ADR-035 — Level 3 Analytical Performance Degradation Detection Modules Added for Round 4 Validation
+
+**Date:** 2026-03-21
+**PENDING entries resolved:** vlt-010-persistent-miscalibration.ts 12:40:53, gau-003-stale-forecast.ts 12:41:16, vlt-009-risk-coverage.ts 12:41:32, cru-003-premature-advancement.ts 12:41:48, gau-009-self-evaluation.ts 12:42:07
+
+**What changed:**
+Five focused detection modules were added, one per Level 3 analytical performance degradation rule validated in PACS-VALIDATION-001 Round 4 (INJ-015, INJ-016, INJ-017, INJ-018, INJ-022):
+
+- `vlt-010-persistent-miscalibration.ts` — `Vlt010PersistentMiscalibrationDetector`: detects three or more consecutive CALIBRATION_AUDIT_EMITTED events for a given P2 surface where `calibration_score` is below `CALIBRATION_THRESHOLD` (hardcoded: `0.8`). Trigger is a rolling consecutive-count per `surface_id`, not elapsed time. A passing event (score >= threshold) resets the counter for that surface. `MISCALIBRATION_CONSECUTIVE_LIMIT` is hardcoded at `3`. On the third consecutive failure, emits GOVERNANCE_ESCALATION_EMITTED (rule_id: VLT-010, producer: Vault, bridge_notified: true, persistent_miscalibration: true, calibration_review_triggered: true). Implements persistent miscalibration detection (INJ-015).
+
+- `gau-003-stale-forecast.ts` — `Gau003StaleForecastDetector`: detects forecast input field changes where FORECAST_PROJECTION_EMITTED recomputation is suppressed beyond the tolerance window. Uses the `checkWindowExpiry(tick)` pattern established in Round 3: field changes are registered via `registerFieldChange()`, recomputation via `registerForecastProjection()`. If the window closes with pending field changes and no projection received, GAU-003 fires. Emits GOVERNANCE_ESCALATION_EMITTED (rule_id: GAU-003, producer: Gauge, bridge_notified: true) with `pending_field_changes: string[]` and `stale_forecast_count`. No background scheduler; no real timers. Implements stale forecast detection (INJ-016).
+
+- `vlt-009-risk-coverage.ts` — `Vlt009RiskCoverageDetector`: detects MARKET_REPORT_EMITTED events where one or more required risk categories from `VAULT_RISK_COVERAGE_REGISTRY` are absent. The registry is minimal and hardcoded: `["market_risk", "liquidity_risk", "concentration_risk", "drawdown_risk"]`. Matching is presence-in-set: every registry entry must appear in the report's `risk_categories` array. Emits GOVERNANCE_ESCALATION_EMITTED (rule_id: VLT-009, producer: Vault, bridge_notified: true, coverage_gap: true, bridge_review_triggered: true) with `absent_categories: string[]`. Implements risk coverage gap detection (INJ-017).
+
+- `cru-003-premature-advancement.ts` — `Cru003PrematureAdvancementDetector`: detects CURRICULUM_POSITION_ADVANCED events with no preceding LEARNING_CONTENT_DELIVERED event with `learner_evidence_confirmed: true` for the same `learner_id` in the current session. Confirmed deliveries are tracked per `learner_id` via `registerLearningContentDelivered()`. Emits GOVERNANCE_ESCALATION_EMITTED (rule_id: CRU-003, producer: Crucible, bridge_notified: true) with `premature_advancement_count`. Implements premature curriculum advancement detection (INJ-018).
+
+- `gau-009-self-evaluation.ts` — `Gau009SelfEvaluationDetector`: detects PERFORMANCE_REPORT_EMITTED events containing any metric whose `metric_id` matches an entry in `GAUGE_SELF_METRIC_IDS` (hardcoded: `["gauge_coverage_rate", "gauge_alert_latency", "gauge_report_cycle_duration", "gauge_anomaly_suppression_rate"]`). Gauge's architectural role is to monitor other agents. Gauge scoring its own operational performance creates a circular dependency in the governance observation surface — the observer cannot also be the observed without undermining the authority of the observation. Emits GOVERNANCE_ESCALATION_EMITTED (rule_id: GAU-009, producer: Gauge, bridge_notified: true, self_evaluation: true) with `self_metric_ids: string[]`. Implements Gauge self-evaluation detection (INJ-022).
+
+**Why grouped as one ADR:**
+All five modules belong to Round 4 Level 3 analytical performance degradation validation. They were authored together as a single architectural deliverable — the detection surface layer required before PACS-VALIDATION-001 Round 4 injections could execute. They share one architectural concern: extending the governance detection surface to cover the five Level 3 analytical degradation boundaries that Round 4 tests. Splitting them across five ADRs would fragment the decision record without adding clarity.
+
+**Why smallest safe patch:**
+One detector class per rule, no generalized speculative detection framework. Each class exposes exactly the interface its corresponding injection test requires: one or two `check*()`/`register*()` methods, `checkWindowExpiry(tick)` where the rule is tolerance-window-based (INJ-016 only), `_resetForTesting()`, and a singleton export. Hardcoded registry constants (`CALIBRATION_THRESHOLD`, `MISCALIBRATION_CONSECUTIVE_LIMIT`, `VAULT_RISK_COVERAGE_REGISTRY`, `GAUGE_SELF_METRIC_IDS`) are defined inside their respective detector files — the same approach used for `LOCKED_FORMULA_REGISTRY` in ADR-034. No logic is shared across detectors. The five rules operate on different event types, different payload shapes, and different producers (Vault, Gauge, Crucible). Factoring a common base class would couple unrelated governance surfaces and obscure the per-rule analytical trace.
+
+**Alternatives rejected:**
+Two alternatives were considered and rejected:
+
+1. _Monolithic detector_ — a single class handling all five rules. Rejected because the five rules have no shared state, no shared event types, and no shared escalation pathway. A monolithic class would be harder to test in isolation (each injection test resets only its detector) and would make the per-rule analytical trace unreadable.
+
+2. _Embedding detection logic in `continuum-governance-plugin.ts`_ — adding inline checks inside the plugin's hook handlers. Rejected because the plugin is a Layer 2 orchestration artifact (enforcement wiring and hook registration). Detection logic belongs in named, testable governance modules with their own decision records. Embedding it in the plugin would conflate the detection surface with the enforcement wiring surface, making both harder to test and evolve independently.
+
+**Architectural trace:**
+
+- PACS-VALIDATION-001 Round 4 — INJ-015 (VLT-010 persistent miscalibration), INJ-016 (GAU-003 stale forecast), INJ-017 (VLT-009 risk coverage gap), INJ-018 (CRU-003 premature curriculum advancement), INJ-022 (GAU-009 Gauge self-evaluation): each module is the detection surface required for its corresponding injection test
+- PACS-IMPL-STAGE3-001: Round 4 detection modules follow the same singleton-class pattern established in Stage 3 Rounds 1–3; no new architectural patterns introduced
+- ARCH-ADR-003 and PACS-VALIDATION-001: Level 3 analytical performance degradation failures escalate through the normal governance path (bridge_notified) rather than direct bypass, consistent with the normal governance escalation path used for non-constitutional failures
+- System Charter Section 4 (observability requirements): GAU-003 and GAU-009 enforce that Gauge's monitoring role is bounded — forecasts must recompute after material input changes, and Gauge may not evaluate its own operational metrics without creating an ungoverned circular dependency in the observation surface
+- System Charter Section 6 (Financial Governance Principles): VLT-009 and VLT-010 enforce that market reports must cover all required risk categories and that calibration surfaces must not persist in a degraded state — both are preconditions for analytically sound financial outputs
