@@ -28,6 +28,7 @@ import {
   tarFilesystemListBeforeToolCallHandler,
 } from "./tar-read-enforcement.js";
 import { tarRepoWriteBeforeToolCallHandler } from "./tar-repo-enforcement.js";
+import { tarSignalWebRetrievalBeforeToolCallHandler } from "./tar-web-retrieval-enforcement.js";
 import { tarWriteBeforeToolCallHandler } from "./tar-write-enforcement.js";
 
 const log = createSubsystemLogger("continuum/governance");
@@ -65,9 +66,12 @@ const continuumGovernancePlugin: OpenClawPluginDefinition = {
     // Register TAR-007 filesystem list enforcement (list_directory / directory_tree).
     api.on("before_tool_call", tarFilesystemListBeforeToolCallHandler, { priority: 94 });
 
+    // Register TAR-009 Signal web retrieval enforcement (web_search / web_fetch).
+    api.on("before_tool_call", tarSignalWebRetrievalBeforeToolCallHandler, { priority: 93 });
+
     log.info(
       "Continuum Governance Plugin activated: " +
-        "TAR-001-008 (all active) wired to before_tool_call pipeline",
+        "TAR-001-009 (all active) wired to before_tool_call pipeline",
     );
   },
 };

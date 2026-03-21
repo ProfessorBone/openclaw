@@ -146,6 +146,15 @@ export const ACTIVE_TAR_REGISTRY: readonly TarEntry[] = [
     status: "active",
     grant_required: true,
   },
+  {
+    capability_id: "TAR-009",
+    mcp_server_name: "web",
+    operation_names: ["web_search", "web_fetch"],
+    action_class: "read-only",
+    approved_agent_ids: ["signal"],
+    status: "active",
+    grant_required: false,
+  },
 ] as const;
 
 // ---------------------------------------------------------------------------
