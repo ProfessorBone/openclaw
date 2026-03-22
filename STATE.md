@@ -32,7 +32,7 @@ Stage 4: COMPLETE — all 6 workloads passed, coverage_rate=1.0, Stage 4 coverag
 
 last_action: Stage 5 Signal production activation: schedule-poller.ts, intake-queue-store.ts, signal-operational-config.json, LaunchAgent plist, HEARTBEAT.md updated, ADR-038 written. Crucible Session 1 complete: 6 questions all demonstrated, BG-C teaching + worked example, 2 MEMORY_COMMIT_AUTH approved by Bridge, cross-session memory store seeded (ADR-037). 252 tests passing.
 next_action: Load LaunchAgent for Signal poller. Await first live Signal scheduled cycle. Continue Stage 5 curriculum sessions with Crucible.
-last_updated: 2026-03-21 20:57:59
+last_updated: 2026-03-21 21:36:14
 
 ---
 
@@ -165,6 +165,18 @@ Authorization condition: 4 clean paper portfolio cycles + Faheem explicit re-aut
 ---
 
 ## Recent Activity
+
+- 2026-03-21 21:36:14 | Edit | continuum/agents/vault/calibration-tracker.ts
+- 2026-03-21 21:35:21 | Edit | continuum/agents/vault/thesis-store.test.ts
+- 2026-03-21 21:35:11 | Edit | continuum/agents/vault/thesis-store.test.ts
+- 2026-03-21 21:35:06 | Write | continuum/agents/vault/vault-config-reader.test.ts
+- 2026-03-21 21:32:34 | Write | /Users/faheem/.openclaw/workspace/vault/HEARTBEAT.md
+- 2026-03-21 21:32:25 | Write | continuum/agents/vault/calibration-tracker.test.ts
+- 2026-03-21 21:32:04 | Write | continuum/agents/vault/thesis-store.test.ts
+- 2026-03-21 21:28:53 | Write | continuum/agents/vault/vault-config-reader.test.ts
+- 2026-03-21 21:28:44 | Write | continuum/agents/vault/calibration-tracker.ts
+- 2026-03-21 21:28:21 | Write | continuum/agents/vault/thesis-store.ts
+- 2026-03-21 21:27:40 | Write | continuum/agents/vault/vault-config-reader.ts
 
 - 2026-03-21 20:57:59 | Edit | continuum/agents/signal/schedule-poller.test.ts
 - 2026-03-21 20:56:58 | Edit | DECISIONS.md

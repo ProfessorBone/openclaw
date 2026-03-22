@@ -936,3 +936,43 @@ Heartbeat and retrieval cadence serve different purposes. Heartbeat is liveness.
 - Signal SOUL.md A4: "Append-only deposit of structured frontier discovery briefs."
 - TAR-009: Signal is the only authorized agent for `web_search` and `web_fetch`; the poller's activation message must route to `agent:signal:main` only.
 - ADR-037: intake-queue-store.ts follows the same append-only JSONL pattern established for Crucible's cross-session memory store.
+
+---
+
+## ADR-039 — Vault Paper Portfolio Activation: Thesis Store, Calibration Tracker, Config Reader
+
+**Date:** 2026-03-21
+**Status:** DECIDED
+
+**Decision:**
+Vault's paper portfolio is activated with three governed modules: a Bridge-owned config reader (`vault-config-reader.ts`), an append-only thesis store (`thesis-store.ts`), and an append-only calibration tracker (`calibration-tracker.ts`). All writes are append-only JSONL. Vault never writes to the Bridge-owned config file. Vault code reads config exclusively through `VaultConfigReader`.
+
+**Implementation:**
+
+- `continuum/agents/vault/vault-config-reader.ts` — `VaultConfigReader` class. Reads `~/.openclaw/agents/the-bridge/vault-paper-trading-config.json`. Fails closed (throws) on missing or malformed config — no inferred defaults. Exposes `isAssetAllowed`, `isAssetClassExcluded`, `getSizingRules`, `getIQGRequiredFields`, `getCalibrationConfig`, `isPaperMode`, `isRealCapitalAuthorized`. Singleton `vaultConfigReader` exported.
+
+- `continuum/agents/vault/thesis-store.ts` — `ThesisStore` class. Append-only JSONL at `~/.openclaw/agents/vault/paper-portfolio/theses.jsonl`. Lifecycle updates (`updateThesisStatus`, `closeThesis`) append new records with incremented `record_version`; originals are never overwritten. `createThesis` enforces P1 validation (IQG required_fields from Bridge config) and asset universe + class exclusion checks before writing. Closure state must be one of the three Bridge-defined valid states. `getActiveTheses`, `getClosedTheses`, `getThesesByAsset` all resolve to the latest record version per `thesis_id`.
+
+- `continuum/agents/vault/calibration-tracker.ts` — `CalibrationTracker` class. Append-only JSONL at `~/.openclaw/agents/vault/paper-portfolio/calibration.jsonl`. `cycle_status` is computed from nine boolean integrity flags: `p1_compliance`, `p2_evaluation_completed`, `p3_segregation_intact`, `p4_violations_zero`, `a6_alerts_clear`, `record_complete_and_auditable`, `no_unauthorized_asset_breach`, `no_undocumented_thesis_modification`, `no_output_bypassed_bridge`. All true → `clean`; any false → `tainted` with `taint_reasons` populated. `isRealCapitalEligible()` requires ≥ 4 clean cycles. `isRetirementEligible()` requires ≥ 1 clean cycle.
+
+- `~/.openclaw/workspace/vault/HEARTBEAT.md` — Updated to liveness-only: report mode status, thesis count, calibration counts, eligibility flags. Explicitly prohibits write operations from heartbeat.
+
+- Tests: `vault-config-reader.test.ts` (7 tests), `thesis-store.test.ts` (11 tests), `calibration-tracker.test.ts` (8 tests).
+
+**Rationale:**
+The fail-closed config design enforces that Vault cannot operate with stale or assumed configuration — it must receive current Bridge-owned parameters at every operation. The append-only JSONL pattern (established in ADR-037) provides a complete audit trail of thesis lifecycle events and calibration cycles without requiring a database. Lifecycle versioning (record_version) enables non-destructive updates while preserving the full history.
+
+**Alternatives considered:**
+
+- Mutable record updates (overwrite in place): rejected because audit traceability requires the full lifecycle history, not just current state.
+- Separate config embedded in Vault workspace: rejected because Bridge configuration ownership (Hard Constraint 4) requires config to originate from and be owned by The Bridge.
+- Inferred defaults on missing config: rejected because Vault operating on stale assumptions is a governance failure. Fail closed is the only safe behavior.
+
+**Governed by:** Vault SOUL.md Hard Constraints 1–10, PACS-VAULT-CAL-001.
+
+**Architectural trace:**
+
+- Vault SOUL.md Hard Constraint 4: "Vault reads Bridge-owned config through VaultConfigReader only. Vault never writes the config."
+- Vault SOUL.md Hard Constraint 9: Calibration cycles are append-only and integrity-flagged.
+- ADR-037: append-only JSONL pattern (Crucible cross-session memory) extended to thesis store and calibration tracker.
+- ADR-038: Signal intake-queue-store.ts (same append-only JSONL pattern) provides architectural consistency across all Continuum agent stores.
