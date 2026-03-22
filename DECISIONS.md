@@ -848,4 +848,91 @@ Two alternatives were considered and rejected:
 - PACS-ARCH-TAR-001: TAR-009 is the authorized capability entry for Signal's external retrieval surface; `ACTIVE_TAR_REGISTRY` is the canonical authorization source; `resolveCapability()` and `checkAgentAuthorization()` enforce it uniformly
 - PACS-ARCH-ACM-001: Signal is the only agent authorized to cross the external retrieval boundary at the tool layer; no other agent's approved_agent_ids list is modified
 - PACS-IMPL-STAGE3-001: TAR-009 activation follows the established handler pattern — dedicated enforcement module, plugin wiring at sequential priority, test coverage for allowed and denied cases
+
+---
+
+## ADR-037 — Crucible Cross-Session Memory Store: Governed Append-Only JSONL Layer
+
+**Date:** 2026-03-21
+**Status:** DECIDED
+
+**Decision:**
+Implement a governed append-only JSONL store for Crucible's cross-session memory at `~/.openclaw/agents/crucible/memory/cross-session-memory.jsonl`. The implementation lives at `continuum/agents/crucible/cross-session-memory-store.ts`. Seed the store with the two memory commits approved by The Bridge in Crucible's first production session.
+
+**Context:**
+Crucible's first live production session (2026-03-21) generated two MEMORY_COMMIT_AUTH requests that were adjudicated approved by The Bridge (reflection_candidate_ids `68f5655f-61d0-4d75-a112-331c35b0d6d7` and `cd1cc2cf-8c96-47df-bc95-f1d1654a1cc5`). The governance loop (Crucible → MEMORY_COMMIT_AUTH → Bridge MEC adjudication → approved) worked correctly. The missing piece was a physical write layer: no persistent cross-session memory store existed in Crucible's workspace.
+
+**Implementation:**
+
+- `continuum/agents/crucible/cross-session-memory-store.ts` — `CrossSessionMemoryStore` class:
+  - `write(record)` — appends one approved record; returns `{ written: false, reason: "not_approved" }` for non-approved records and `{ written: false, reason: "duplicate" }` if `reflection_candidate_id` already present (idempotency); creates the storage directory if absent.
+  - `loadAll()` — reads all JSONL lines, skips malformed lines, returns `CrossSessionMemoryRecord[]`.
+  - `DEFAULT_STORE_PATH` exported constant (`~/.openclaw/agents/crucible/memory/cross-session-memory.jsonl`).
+  - `crossSessionMemoryStore` singleton using the default path.
+  - No external dependencies beyond Node built-ins (`node:fs`, `node:os`, `node:path`).
+
+- `continuum/agents/crucible/cross-session-memory-store.test.ts` — 7 focused tests covering: empty-file load, approved write + load, non-approved rejection, idempotent duplicate skip, multi-record append, JSONL line validity, directory auto-creation.
+
+- `~/.openclaw/agents/crucible/memory/cross-session-memory.jsonl` — seeded with the two approved commits using exact adjudicated outcomes from The Bridge.
+
+**Alternatives considered:**
+
+- SQLite or a structured DB file: rejected as over-engineered for a two-field lookup over a small append-only set. JSONL is the minimal durable format that supports streaming append and line-by-line load without dependencies.
+- In-process array (volatile memory only): rejected because cross-session memory must persist across restarts and sessions.
+- Filesystem write via Bash tool: rejected per standing feedback — use the Write tool with full absolute path for vault/workspace file writes.
+
+**Tradeoffs:**
+JSONL with linear scan on load is O(n) per write (idempotency check). Acceptable at current scale (tens to hundreds of records). If the store grows to thousands of entries, an index layer can be introduced without changing the JSONL format.
+
+**Follow-on:**
+Crucible's bootstrap sequence should load this store at session start so approved memory is available for instructional continuity. That wiring is a separate task.
+
+**Architectural trace:**
+
+- PACS-VALIDATION-001 INJ-012 (CRU-002): reflection candidates require demonstrated evidence before forming; the memory write layer must also require Bridge adjudication before persisting.
+- SOUL.md (Crucible): "Crucible may generate self-evaluation candidates through the governed Reflexion loop, but does not treat those evaluations as authoritative until they have passed external governance through MEMORY_COMMIT_AUTH and MEC adjudication."
 - System Charter Section 3 (governance directionality): Signal's web retrieval operates within a Bridge-defined scope envelope; TAR-009 enforces that the external boundary may only be crossed by Signal, not by agents whose roles do not include external data ingestion
+
+---
+
+## ADR-038 — Signal Production Activation: Scheduler-Driven Weekly Dispatch
+
+**Date:** 2026-03-21
+**Status:** DECIDED
+
+**Decision:**
+Signal's weekly retrieval cycle is triggered by an external schedule poller (`continuum/agents/signal/schedule-poller.ts`) running every 6 hours via a macOS LaunchAgent (`~/Library/LaunchAgents/ai.openclaw.signal-poller.plist`), not by the 30-minute OpenClaw heartbeat. The poller reads Bridge-owned operational configuration (`~/.openclaw/agents/the-bridge/signal-operational-config.json`) to determine cadence. It enforces cycle-level idempotency via a cycle ledger (`~/.openclaw/agents/signal/cycle-ledger.jsonl`). The activation payload includes `trigger_type`, `cycle_id`, `config_version`, `dispatch_timestamp`, and `period_key` for full auditability.
+
+**Implementation:**
+
+- `~/.openclaw/agents/the-bridge/signal-operational-config.json` — Bridge-owned config. Defines `signal_enabled` kill switch, weekly schedule (sunday, 06:00 UTC), five retrieval scope domains, approved source list, relevance rubric (threshold 0.6), capacity limit (20), brief format version, and deposit target.
+
+- `continuum/agents/signal/schedule-poller.ts` — Exports testable pure-logic functions (`isInScheduleWindow`, `getPeriodKey`, `hasDispatchedForPeriod`, `isInProgress`, `buildActivationMessage`, `loadCycleLedger`, `appendLedgerEntry`, `readBridgeConfig`) and a `runPoller()` orchestrator that accepts injectable now/configPath/ledgerPath/dispatch for isolation. Gateway dispatch is isolated in `dispatchToGateway()`. Entry point only runs when executed directly via `import.meta.url`.
+
+- `continuum/agents/signal/intake-queue-store.ts` — `IntakeQueueStore` class (same pattern as `cross-session-memory-store.ts`). Append-only JSONL at `~/.openclaw/agents/signal/intake-queue/briefs.jsonl`. Methods: `depositBrief` (idempotent on `brief_id`), `getAllBriefs`, `getBriefsByCycleId`, `getBriefById`. Auto-creates directory.
+
+- `~/Library/LaunchAgents/ai.openclaw.signal-poller.plist` — LaunchAgent. `StartInterval: 21600` (6 hours). `RunAtLoad: true`. `KeepAlive: false`. Runs `bun continuum/agents/signal/schedule-poller.ts` from `/Users/faheem/openclaw`. Logs to `/tmp/openclaw/signal-poller-stdout.log` and `signal-poller-stderr.log`.
+
+- `~/.openclaw/workspace/signal/HEARTBEAT.md` — Updated to liveness-only: report status, last cycle, next scheduled cycle, completed count. Explicitly prohibits initiating a retrieval cycle from heartbeat.
+
+- `continuum/agents/signal/schedule-poller.test.ts` — 13 focused tests.
+- `continuum/agents/signal/intake-queue-store.test.ts` — 7 focused tests.
+
+**Rationale:**
+Heartbeat and retrieval cadence serve different purposes. Heartbeat is liveness. Schedule is workload activation. Overloading heartbeat with schedule logic blurs health, schedule, and workload boundaries and violates the separation of concerns in Signal's PEAS model (S1 is Schedule Trigger Monitor, not heartbeat reader). The poller reads Bridge config rather than hardcoding cadence, preserving Bridge configuration ownership (Signal Hard Constraint 4). Cycle-level idempotency on ISO week period keys prevents double dispatch after restarts or overlapping 6-hour poll windows.
+
+**Alternatives considered:**
+
+- Heartbeat-driven activation: rejected because heartbeat is liveness monitoring, not a scheduler. Overloading it conflates two distinct control surfaces.
+- Cron-based scheduling: rejected because LaunchAgent is the macOS-native equivalent and is already in use for the gateway. A second scheduler type would add operational complexity.
+- Per-invocation grant authorization for dispatch: rejected as unnecessary ceremony for a scheduled read-only cycle under Bridge configuration ownership.
+
+**Governed by:** Signal SOUL.md Hard Constraint 1, Signal AGENTS.md Section 2, PACS-PEAS-AGT4-001 Section 3.
+
+**Architectural trace:**
+
+- Signal SOUL.md Hard Constraint 1: "Signal is activated only by scheduled trigger. Signal never activates itself."
+- Signal SOUL.md S2 (Bridge Config Reader): "Signal reads the Bridge-owned operational config at cycle start. Signal never writes to it."
+- Signal SOUL.md A4: "Append-only deposit of structured frontier discovery briefs."
+- TAR-009: Signal is the only authorized agent for `web_search` and `web_fetch`; the poller's activation message must route to `agent:signal:main` only.
+- ADR-037: intake-queue-store.ts follows the same append-only JSONL pattern established for Crucible's cross-session memory store.

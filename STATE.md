@@ -15,7 +15,7 @@
 ## Current Phase
 
 Phase 2 — Implementation (Stage 5: Production Onboarding)
-current_phase: Stage 4 COMPLETE — awaiting Faheem authorization to begin Stage 5
+current_phase: Stage 5 IN PROGRESS — Signal production activation complete, Crucible Session 1 complete
 
 Phase 1 (Blueprint & Documentation) is COMPLETE. All Phase 1 artifacts are
 locked in the Obsidian vault at Projects/Faheem's PAC System/.
@@ -30,9 +30,9 @@ Stage 3: COMPLETE — all 4 rounds, 219 tests passing
 Pre-Stage 4 prep: COMPLETE — Bridge SOUL.md v1.1.0, TAR-009 activated, ADR-036 written (commit 3a3061d5d)
 Stage 4: COMPLETE — all 6 workloads passed, coverage_rate=1.0, Stage 4 coverage gate PASSED (2026-03-21)
 
-last_action: Stage 4 COMPLETE. WL5 Vault (A3 emit_market_report, IQG fired, A6 silent, P3 compliant, cycle_id=8e6e5041). WL6 Gauge confirmed coverage_rate=1.0 (5/5 workloads), stage_4_coverage_gate=PASSED. DECISIONS.md 0 PENDING RATIONALE.
-next_action: Await Faheem authorization before beginning Stage 5 (Production Onboarding). Do not push until authorized.
-last_updated: 2026-03-21 14:54:36
+last_action: Stage 5 Signal production activation: schedule-poller.ts, intake-queue-store.ts, signal-operational-config.json, LaunchAgent plist, HEARTBEAT.md updated, ADR-038 written. Crucible Session 1 complete: 6 questions all demonstrated, BG-C teaching + worked example, 2 MEMORY_COMMIT_AUTH approved by Bridge, cross-session memory store seeded (ADR-037). 252 tests passing.
+next_action: Load LaunchAgent for Signal poller. Await first live Signal scheduled cycle. Continue Stage 5 curriculum sessions with Crucible.
+last_updated: 2026-03-21 20:57:59
 
 ---
 
@@ -165,6 +165,30 @@ Authorization condition: 4 clean paper portfolio cycles + Faheem explicit re-aut
 ---
 
 ## Recent Activity
+
+- 2026-03-21 20:57:59 | Edit | continuum/agents/signal/schedule-poller.test.ts
+- 2026-03-21 20:56:58 | Edit | DECISIONS.md
+- 2026-03-21 20:56:21 | Write | /Users/faheem/.openclaw/workspace/signal/HEARTBEAT.md
+- 2026-03-21 20:56:13 | Write | /Users/faheem/Library/LaunchAgents/ai.openclaw.signal-poller.plist
+- 2026-03-21 20:55:14 | Write | continuum/agents/signal/intake-queue-store.test.ts
+- 2026-03-21 20:54:55 | Write | continuum/agents/signal/schedule-poller.test.ts
+- 2026-03-21 20:54:16 | Write | continuum/agents/signal/intake-queue-store.ts
+- 2026-03-21 20:53:59 | Write | continuum/agents/signal/schedule-poller.ts
+- 2026-03-21 20:53:04 | Write | /Users/faheem/.openclaw/agents/the-bridge/signal-operational-config.json
+- 2026-03-21 20:32:07 | Edit | DECISIONS.md
+- 2026-03-21 20:31:15 | Write | /Users/faheem/.openclaw/agents/crucible/memory/cross-session-memory.jsonl
+- 2026-03-21 20:30:48 | Write | continuum/agents/crucible/cross-session-memory-store.test.ts
+- 2026-03-21 20:30:32 | Write | continuum/agents/crucible/cross-session-memory-store.ts
+- 2026-03-21 17:00:50 | Write | continuum/test/stage5-bridge-adjudicate.ts
+- 2026-03-21 16:56:25 | Write | continuum/test/stage5-crucible-session1-close.ts
+- 2026-03-21 16:51:00 | Write | continuum/test/stage5-crucible-bgc-deepen.ts
+- 2026-03-21 16:41:45 | Write | continuum/test/stage5-crucible-q6-answer.ts
+- 2026-03-21 16:29:14 | Write | continuum/test/stage5-crucible-q5-answer.ts
+- 2026-03-21 16:13:46 | Write | continuum/test/stage5-crucible-q4-answer.ts
+- 2026-03-21 16:02:45 | Write | continuum/test/stage5-crucible-q3-answer.ts
+- 2026-03-21 15:26:01 | Write | continuum/test/stage5-crucible-q2-answer.ts
+- 2026-03-21 15:14:10 | Write | continuum/test/stage5-crucible-q1-answer.ts
+- 2026-03-21 15:06:46 | Write | continuum/test/stage5-crucible-session1.ts
 
 - 2026-03-21 14:54:36 | Edit | .gitignore
 
