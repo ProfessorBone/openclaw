@@ -976,3 +976,131 @@ The fail-closed config design enforces that Vault cannot operate with stale or a
 - Vault SOUL.md Hard Constraint 9: Calibration cycles are append-only and integrity-flagged.
 - ADR-037: append-only JSONL pattern (Crucible cross-session memory) extended to thesis store and calibration tracker.
 - ADR-038: Signal intake-queue-store.ts (same append-only JSONL pattern) provides architectural consistency across all Continuum agent stores.
+
+---
+
+## ADR-040 — Injection Signal Classifier Production Path: Option D Adopted
+
+**Date:** 2026-03-29
+**Status:** DECIDED
+
+**Context:**
+
+The Injection Signal Classifier (ISC) is a fine-tuned Mistral-7B-Instruct-v0.3 LoRA adapter whose purpose is to detect prompt injection attacks before they reach agent execution. Four training runs have been completed (v1 through v5, with v5 being a regression). The evaluation history is:
+
+- v1 (pipeline validation): binary public dataset, all six pipeline gates passed, benign overfire.
+- v2 (multiclass): 1,800 Haiku-generated examples, binary collapse pattern persisted, no subclass separation.
+- v3 dataset: designed but not yet trained against.
+- v4 (shipping candidate evaluated): binary accuracy 93.6% (PASS), benign recall 100% (PASS), exfiltration recall 90% (PASS), schema compliance 100% (PASS). Two safety-critical thresholds failed: attack FNR 9.8% (target <5%, FAIL), benign precision 84.7% (target >90%, FAIL). 26 attack-family inputs misclassified as benign. NO-SHIP verdict.
+- v5 (narrow data pass): REGRESSION. Attack FNR rose to 23.1%, benign precision fell to 0.702. Professional/governance tone became a benign signal overriding explicit attack indicators.
+
+DL-025 Decision B (vault Decision Log) recorded Option B as the initial temporary accepted risk — shared-runtime deployment rather than isolated process. DL-025 explicitly named Option D as the recommended path and defined two revisit triggers: before the classifier is promoted from planned to active, and when MLX local serving becomes operational.
+
+The revisit trigger is now reached. The classifier work has produced a best-available adapter (v4) that does not meet standalone shipping criteria but provides meaningful security value when combined with a complementary defense layer.
+
+**Decision:**
+
+Adopt Option D as the PACS classifier production path: deploy v4 together with a heuristic pre-filter as a combined defense. The heuristic pre-filter blocks high-confidence attack patterns before they reach the v4 adapter, reducing v4's false-negative exposure on the attack families it misclassifies. Together they form a two-tier defense that is stronger than either component alone.
+
+Option B (shared-runtime, no pre-filter) is superseded by this decision. Option A (isolated process, separate serving stack) remains the long-term target architecture and is not abandoned — it is deferred to when MLX local serving is operational.
+
+**Rationale:**
+
+v4 is the best available adapter from five training runs. Its primary failure mode is benign-boundary overconfidence on subtle attacks using professional or governance-adjacent tone — a known and characterized weakness, not an uncharacterized one. A heuristic pre-filter targeting high-confidence structural attack patterns (explicit override instructions, authority spoofing with action directives, tool misuse with known patterns) operates on orthogonal signal and addresses exactly the failure mode v4 cannot cover well. The combination provides defense-in-depth without waiting for v5 or v6 training to complete.
+
+Shipping v4 alone was correctly rejected by the evaluation gate. Deploying nothing while waiting for a standalone-shippable adapter leaves the system unprotected for an indefinite period. Option D is the architecturally honest intermediate posture.
+
+**Consequences:**
+
+- The heuristic pre-filter must be designed and implemented before Option D is considered active. A decision entry is not an implementation.
+- The pre-filter must not be tuned against the same patterns that caused v4's failures — the two components must remain independently calibrated.
+- The combined defense must be evaluated as a unit, not individually, before production deployment.
+- v5 regression analysis (PACS-CLS-DIAG-002) must be reviewed before any v6 training begins. Root cause is documented: benign contrast examples overwhelmed attack cues.
+- v4 adapter and all evaluation artifacts must be preserved at their current state. No retraining overwrites them.
+
+**Reconsideration trigger:**
+
+This decision must be revisited under any of the following conditions:
+
+- A standalone-shippable adapter (all six evaluation thresholds met) is produced by a subsequent training run.
+- MLX local serving becomes operational, at which point Option A isolation must be re-evaluated.
+- The heuristic pre-filter design reveals that Option D's combined defense does not meaningfully close v4's false-negative gap.
+- A production incident demonstrates that the combined defense is insufficient.
+
+Until a reconsideration trigger fires, Option D is the active production path. No option re-selection work is required.
+
+**Supersedes:** DL-025 Decision B (Option B as temporary accepted risk). DL-025 Decision A (governance-critical agent constraint) is unaffected.
+
+**Governed by:** PACS-CLS-EVAL-001 (shipping evaluation spec), PACS-CLS-DIAG-001 (v4 failure analysis), PACS-CLS-DIAG-002 (v5 regression analysis), PACS-CLS-INTEG-001 (MEC S7 integration spec).
+
+**Architectural trace:**
+
+- MEC SOUL.md S7: Injection Signal Classifier is the sensor feeding the MEC security detection pathway.
+- PACS-CLS-PIPE-001: pipeline integrity checklist (12 gates) must pass before any adapter is promoted to active.
+- DL-025 Decision A: Bridge and MEC remain permanently cloud-bound. A local classifier failure does not take down the governance control plane — this remains the primary compensating control until Option D is fully operational.
+
+---
+
+## ADR-041 — First Locus Artifact Designation — Four-Layer Observability Framework Commit
+
+**Date:** 2026-03-29
+**Status:** DECIDED
+
+**Context:**
+
+Locus activation requires at least one Bridge-designated artifact through the artifact designation pathway (Locus PEAS S1). Three approved Crucible commits exist in the cross-session memory store (`~/.openclaw/agents/crucible/memory/cross-session-memory.jsonl`): mec-adj-68f5655f, mec-adj-cd1cc2cf, mec-adj-a3f2b891. No Bridge-owned artifact designation log existed prior to this decision. The artifact designation pathway was declared in the Locus PEAS but had no file-level audit trail. INJ-013 (LOC-002) and INJ-014 (FDR-003) passed on 2026-03-29, clearing the Locus trust gate. This designation is the first operational use of the artifact designation pathway.
+
+**Decision:**
+
+The Bridge designates mec-adj-cd1cc2cf (Crucible cross-session memory commit, taxonomy-fields-metrics-traceability insight) as the first artifact for Locus ingestion. The artifact designation pathway is established with a Bridge-owned append-only JSONL log at `~/.openclaw/agents/the-bridge/artifact-designation-log.jsonl` (ARTIFACT_DESIGNATED record, designation_sequence: 1, designation_id: 2b1d94f5-088d-48cc-9f8b-98490d058d7d).
+
+**Rationale:**
+
+The four-layer observability commit (mec-adj-cd1cc2cf) is effectively a mini-schema: five named entities (observability, taxonomy, fields, metrics, traceability) with explicit linked-to and required-for edges between them as expressed in the commit's key_insight and evidence anchors. Locus graph extraction on this artifact will produce an inspectable, verifiable result — named nodes with typed relationships — that confirms the ingestion pathway is working correctly before less-structured artifacts are introduced. The prior commit (mec-adj-68f5655f) covers the same observability domain at a higher level of abstraction and is better suited as a second-ingestion artifact once the pathway is validated. The subsequent commit (mec-adj-a3f2b891) introduces the non-substitutability argument and is better suited as a third-ingestion artifact.
+
+**Consequences:**
+
+- `artifact-designation-log.jsonl` is established as the Bridge-owned designation log. Future designations append to it; no record is ever overwritten.
+- Locus S1 sensor now has a receivable artifact. Locus is expected to process this designation in its next session.
+- Designation sequence 1 is consumed. Next designation will use sequence 2.
+- The remaining two approved Crucible commits (mec-adj-68f5655f, mec-adj-a3f2b891) are not yet designated; they remain pending designation in subsequent sessions.
+
+**Follow-on:**
+
+The next session must confirm Locus received and processed this designation. Inspect Locus's HEARTBEAT.md and session log for evidence of S1 intake. If no S1 event is recorded, investigate the ingestion pathway before proceeding with additional designations.
+
+**Governed by:** Locus PEAS S1 (artifact ingestion sensor), PACS-VALIDATION-001 INJ-013, INJ-014.
+
+---
+
+## ADR-042 — LOC-002 Contradiction Detection and FDR-003 Silent Absorption Rules
+
+**Date:** 2026-03-29
+**Status:** DECIDED
+
+**Context:**
+
+The PACS-VALIDATION-001 injection rule suite covers Levels 1–3 failure modes across all governed agents. INJ-013 (LOC-002) and INJ-014 (FDR-003) are Level 3 — Analytical Performance Degradation rules targeting Locus and Foundry respectively. These rules were absent from the suite at the time of the INJ-006–012/019–020 commit. Locus trust-gate readiness required INJ-013 and INJ-014 to be implemented and passing before Locus could receive its first artifact designation (ADR-041 above). The Locus Event Model (G-003 CONTRADICTION_FLAGGED) and Foundry Event Model (I-002 SILENT_ABSORPTION_DETECTED) provided the exact event signatures for the detection paths.
+
+**Decision:**
+
+Two new injection rule detector modules are added to `continuum/governance/`:
+
+- `loc-002-contradiction-detection.ts` — singleton `loc002ContradictionDetector`. Detects KNOWLEDGE_EXTRACTION_COMPLETED events where (Path A) `contradiction_check_performed` is false, or (Path B) `contradiction_detected` is true but no paired CONTRADICTION_FLAGGED event was emitted for the matching `extraction_id`. Both paths emit `INTEGRITY_VIOLATION_DETECTED`, `rule_id: "LOC-002"`, `bridge_notified: true`. Tracks `contradiction_check_coverage_rate`.
+
+- `fdr-003-silent-absorption.ts` — singleton `fdr003SilentAbsorptionDetector`. Detects ARTIFACT_SYNTHESIS_COMPLETED events where (Path A) `meaning_shift_detected` is true, or (Path B) `semantic_drift_score > 0.15`, with no paired SILENT_ABSORPTION_DETECTED event for the matching `synthesis_id`. Both paths emit `INTEGRITY_VIOLATION_DETECTED`, `rule_id: "FDR-003"`, `bridge_notified: true`. Tracks `silent_absorption_rate`.
+
+Both modules mirror the structure of `loc-001-graph-auth.ts`: header block, Types section, Detector class, singleton export, `_resetForTesting` method. Neither module is imported in `continuum-governance-plugin.ts` — they are standalone detectors used in the test harness only, consistent with the existing injection rule module pattern.
+
+Test coverage: `continuum/test/inj-013-014.test.ts` — 7 tests (injection case, control case, path coverage for each rule). All 286 continuum suite tests pass.
+
+**Rationale:**
+
+LOC-002 and FDR-003 are pre-conditions for Locus trust-gate clearance. A Locus ingestion pathway that silently continues past detected contradictions (LOC-002 Path B) or that absorbs source-content meaning shifts without flagging them (FDR-003) would produce untrustworthy graph state. The injection rules make these failure modes detectable in the test harness so they can be confirmed absent before the first real artifact is ingested. The two-path design (explicit flag absence + threshold breach) follows the established pattern from LOC-001 and CRU-002.
+
+**Consequences:**
+
+- 7 new tests in the continuum suite. 286 total, all passing.
+- No plugin changes. The governance plugin remains TAR + Bridge-decision enforcement only.
+- INJ-013 and INJ-014 are now cleared, satisfying the Locus trust gate for ADR-041.
+- PENDING RATIONALE entries for `loc-002-contradiction-detection.ts` and `fdr-003-silent-absorption.ts` (2026-03-29) are resolved by this ADR.
