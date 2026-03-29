@@ -1104,3 +1104,36 @@ LOC-002 and FDR-003 are pre-conditions for Locus trust-gate clearance. A Locus i
 - No plugin changes. The governance plugin remains TAR + Bridge-decision enforcement only.
 - INJ-013 and INJ-014 are now cleared, satisfying the Locus trust gate for ADR-041.
 - PENDING RATIONALE entries for `loc-002-contradiction-detection.ts` and `fdr-003-silent-absorption.ts` (2026-03-29) are resolved by this ADR.
+
+---
+
+## ADR-043 -- Locus Phase B Validation: Temporary Tier 1 Deviation
+
+**Date:** 2026-03-29
+**Status:** DECIDED
+
+**Context:**
+
+Locus SOUL.md and PACS-PEAS-AGT2-001 establish a hard Tier 2 SLM constraint: Locus must operate on a local SLM via Ollama for entity extraction, relationship classification, and provenance tagging. ADR-024 registered Locus in openclaw.json with a scaffolding runtime (originally claude-opus-4-6, migrated to openai/gpt-5.4 per DL-024) with the explicit note that the openclaw.json entry reflects scaffolding convention and the Tier 2 constraint governs operational deployment.
+
+MLX local serving is not yet operational. The Ollama Tier 2 deployment environment does not yet exist in Continuum. Locus Phase B requires a live gateway session to produce extraction output from the first designated artifact (mec-adj-cd1cc2cf). Without a running Tier 2 model, Phase B cannot execute against the architecturally correct runtime.
+
+**Decision:**
+
+Locus Phase B validation runs on the current scaffolding model (openai/gpt-5.4) as a temporary Tier 1 deviation. This is a validation run, not operational deployment. The purpose is to confirm the extraction pathway produces correct output before the Tier 2 runtime is established. The deviation is time-bounded: it expires when MLX local serving becomes operational or when Ollama is configured as the Locus runtime, whichever comes first.
+
+**Rationale:**
+
+The same pattern was used for the Injection Signal Classifier (DL-025 Decision B) and the Crucible production sessions: operate within the best available runtime, document the deviation, define the reconsideration trigger. Holding Phase B until Tier 2 is available would leave the intake pathway unvalidated indefinitely. The extraction output produced under this deviation is treated as validation evidence only -- it does not constitute authoritative graph state until the Tier 2 constraint is satisfied.
+
+**Compensating controls:**
+
+1. Extraction output from this validation session is explicitly tagged as Tier 1 provisional output.
+2. No graph writes are authorized from this session. A1 extraction candidates require Bridge MEMORY_COMMIT_AUTH adjudication before persistence. MEC adjudication enforces the governance gate regardless of model tier.
+3. This deviation is documented and visible. No silent operation.
+
+**Reconsideration trigger:**
+
+This decision must be revisited when: (a) MLX local serving becomes operational for Locus, or (b) Ollama is configured as the Locus runtime in openclaw.json. At that point, Locus sessions must migrate to the Tier 2 SLM. All subsequent graph write candidates from Tier 2 sessions supersede any candidates produced under this deviation.
+
+**Governed by:** PACS-PEAS-AGT2-001, ADR-024, DL-024, DL-025.
